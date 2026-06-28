@@ -337,11 +337,11 @@ muse::modularity::ContextPtr BaseApplication::setupNewContext(const StringList& 
 
 void BaseApplication::setupContext(const muse::modularity::ContextPtr& ctxId)
 {
-    LOGI() << "setupContext: begin, " << csetups.size() << " modules";
     const IApplication::RunMode runMode = m_appOptions->runMode;
     // Setup
     std::vector<muse::modularity::IContextSetup*>& csetups = contextData(ctxId).setups;
 
+    LOGI() << "setupContext: begin, " << csetups.size() << " modules";
     LOGI() << "setupContext: registerExports loop";
     for (modularity::IContextSetup* s : csetups) {
         s->registerExports();
@@ -354,19 +354,16 @@ void BaseApplication::setupContext(const muse::modularity::ContextPtr& ctxId)
 
     LOGI() << "setupContext: onPreInit loop";
     for (modularity::IContextSetup* s : csetups) {
-        LOGI() << "setupContext: onPreInit: " << s->moduleName();
         s->onPreInit(runMode);
     }
 
     LOGI() << "setupContext: onInit loop";
     for (modularity::IContextSetup* s : csetups) {
-        LOGI() << "setupContext: onInit: " << s->moduleName();
         s->onInit(runMode);
     }
 
     LOGI() << "setupContext: onAllInited loop";
     for (modularity::IContextSetup* s : csetups) {
-        LOGI() << "setupContext: onAllInited: " << s->moduleName();
         s->onAllInited(runMode);
     }
     LOGI() << "setupContext: done";
