@@ -81,6 +81,8 @@ public:
 
     Q_INVOKABLE void openUrl(const QString& url);
 
+    Q_INVOKABLE bool isOpened(const QString& uri) const;
+
 private:
     std::vector<muse::IInteractive::Button> buttons(const QJSValueList& buttons) const;
 };
