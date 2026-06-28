@@ -39,12 +39,24 @@ endif()
 
 set(REMOTE_ROOT_URL https://raw.githubusercontent.com/musescore/muse_deps/main)
 set(remote_url ${REMOTE_ROOT_URL}/harfbuzz/12.3.0)
+
+# Source tree: vendored .cmake + source archive (avoids 404 from
+# restructured muse_deps repo). Build dir: extraction target (writable).
+set(VENDORED_DEPS_DIR ${MUSE_FRAMEWORK_PATH}/buildscripts/cmake/deps)
 set(local_path ${PROJECT_BINARY_DIR}/_deps/harfbuzz)
+
 if (NOT EXISTS ${local_path}/harfbuzz.cmake)
     file(MAKE_DIRECTORY ${local_path})
-    file(DOWNLOAD ${remote_url}/harfbuzz.cmake ${local_path}/harfbuzz.cmake
-        HTTPHEADER "Cache-Control: no-cache"
-    )
+    if (EXISTS ${VENDORED_DEPS_DIR}/harfbuzz.cmake)
+        file(COPY ${VENDORED_DEPS_DIR}/harfbuzz.cmake DESTINATION ${local_path})
+        if (EXISTS ${VENDORED_DEPS_DIR}/harfbuzz_src.7z)
+            file(COPY ${VENDORED_DEPS_DIR}/harfbuzz_src.7z DESTINATION ${local_path})
+        endif()
+    else()
+        file(DOWNLOAD ${remote_url}/harfbuzz.cmake ${local_path}/harfbuzz.cmake
+            HTTPHEADER "Cache-Control: no-cache"
+        )
+    endif()
 endif()
 
 include(${local_path}/harfbuzz.cmake)

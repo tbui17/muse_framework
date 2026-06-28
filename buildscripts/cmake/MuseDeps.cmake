@@ -48,11 +48,17 @@ endif()
 set(REMOTE_ROOT_URL https://raw.githubusercontent.com/musescore/muse_deps/main)
 set(LOCAL_ROOT_PATH ${FETCHCONTENT_BASE_DIR})
 
+# Vendored .cmake files for when muse_deps is unavailable (CI)
+set(VENDORED_DEPS_DIR ${CMAKE_CURRENT_LIST_DIR}/deps)
+
 function(populate name remote_suffix)
     set(remote_url ${REMOTE_ROOT_URL}/${remote_suffix})
     set(local_path ${LOCAL_ROOT_PATH}/${name})
 
-    if (NOT EXISTS ${local_path}/${name}.cmake)
+    # Try vendored copy first — avoids 404 from restructured muse_deps repo
+    if (EXISTS ${VENDORED_DEPS_DIR}/${name}.cmake)
+        set(local_path ${VENDORED_DEPS_DIR})
+    elseif (NOT EXISTS ${local_path}/${name}.cmake)
         file(MAKE_DIRECTORY ${local_path})
         file(DOWNLOAD ${remote_url}/${name}.cmake ${local_path}/${name}.cmake
             HTTPHEADER "Cache-Control: no-cache"

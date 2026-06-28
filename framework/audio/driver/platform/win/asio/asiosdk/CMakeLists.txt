@@ -10,12 +10,19 @@ else()
 
     set(REMOTE_ROOT_URL https://raw.githubusercontent.com/musescore/muse_deps/main)
     set(remote_url "${REMOTE_ROOT_URL}/asiosdk/ASIO-SDK_2.3.4_2025-10-15")
-    set(local_path ${PROJECT_BINARY_DIR}/_deps/asiosdk)
-    if (NOT EXISTS ${local_path}/asiosdk.cmake)
-        file(MAKE_DIRECTORY ${local_path})
-        file(DOWNLOAD ${remote_url}/asiosdk.cmake ${local_path}/asiosdk.cmake
-            HTTPHEADER "Cache-Control: no-cache"
-        )
+
+    # Try vendored copy first — avoids 404 from restructured muse_deps repo
+    set(VENDORED_DEPS_DIR ${MUSE_FRAMEWORK_PATH}/buildscripts/cmake/deps)
+    if (EXISTS ${VENDORED_DEPS_DIR}/asiosdk.cmake)
+        set(local_path ${VENDORED_DEPS_DIR})
+    else()
+        set(local_path ${PROJECT_BINARY_DIR}/_deps/asiosdk)
+        if (NOT EXISTS ${local_path}/asiosdk.cmake)
+            file(MAKE_DIRECTORY ${local_path})
+            file(DOWNLOAD ${remote_url}/asiosdk.cmake ${local_path}/asiosdk.cmake
+                HTTPHEADER "Cache-Control: no-cache"
+            )
+        endif()
     endif()
 
     include(${local_path}/asiosdk.cmake)
