@@ -117,12 +117,9 @@ void GuiApplication::doFinish()
 void GuiApplication::startupScenario(const muse::modularity::ContextPtr& ctxId)
 {
     TRACEFUNC;
-    LOGI() << "GuiApplication::startupScenario: entered, scheduling loadMainWindow";
 
     QMetaObject::invokeMethod(qApp, [this, ctxId]() {
-        LOGI() << "GuiApplication::startupScenario: queued lambda entered, calling loadMainWindow";
         bool ok = loadMainWindow(ctxId);
-        LOGI() << "GuiApplication::startupScenario: loadMainWindow returned " << ok;
         if (ok) {
             QMetaObject::invokeMethod(qApp, [this, ctxId]() {
                 doStartupScenario(ctxId);
@@ -134,7 +131,6 @@ void GuiApplication::startupScenario(const muse::modularity::ContextPtr& ctxId)
 bool GuiApplication::loadMainWindow(const muse::modularity::ContextPtr& ctxId)
 {
     TRACEFUNC;
-    LOGI() << "loadMainWindow: entered";
 
     IF_ASSERT_FAILED(ctxId) {
         return false;
@@ -159,14 +155,12 @@ bool GuiApplication::loadMainWindow(const muse::modularity::ContextPtr& ctxId)
     }
 
     QString path = mainWindowQmlPath(platform);
-    LOGI() << "loadMainWindow: loading QML: " << path;
     QQmlComponent component = QQmlComponent(engine, path);
     if (!component.isReady()) {
         LOGE() << "Failed to load main qml file, err: " << component.errorString();
         return false;
     }
 
-    LOGI() << "loadMainWindow: QML component ready, creating context";
     QQmlContext* qmlCtx = new QQmlContext(engine);
     qmlCtx->setObjectName(QString("QQmlContext: %1").arg(ctxId->id));
     QmlIoCContext* iocCtx = new QmlIoCContext(qmlCtx);
@@ -174,20 +168,17 @@ bool GuiApplication::loadMainWindow(const muse::modularity::ContextPtr& ctxId)
     qmlCtx->setContextProperty("ioc_context", QVariant::fromValue(iocCtx));
 
     QObject* obj = component.create(qmlCtx);
-    LOGI() << "loadMainWindow: component.create done, obj=" << obj;
     if (!obj) {
         LOGE() << "failed Qml load\n";
         QCoreApplication::exit(-1);
         return false;
     }
 
-    LOGI() << "loadMainWindow: setting window visible";
     // The main window must be shown at this point so KDDockWidgets can read its size correctly
     // and scale all sizes properly. https://github.com/musescore/MuseScore/issues/21148
     QQuickWindow* window = dynamic_cast<QQuickWindow*>(obj);
     window->setVisible(true);
 
-    LOGI() << "loadMainWindow: done, returning true";
     m_windows[ctxId->id] = window;
 
     return true;
