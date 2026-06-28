@@ -197,26 +197,36 @@ void BaseApplication::doSetup(const std::shared_ptr<CmdOptions>& options)
     // ====================================================
     // Setup modules: onPreInit
     // ====================================================
+    LOGI() << "doSetup: onPreInit begin";
     m_globalModule->onPreInit(runMode);
+    LOGI() << "doSetup: onPreInit global done";
     for (modularity::IModuleSetup* m : m_modules) {
+        LOGI() << "doSetup: onPreInit module: " << m->moduleName();
         m->onPreInit(runMode);
     }
 
     // ====================================================
     // Setup modules: onInit
     // ====================================================
+    LOGI() << "doSetup: onInit begin";
     m_globalModule->onInit(runMode);
+    LOGI() << "doSetup: onInit global done";
     for (modularity::IModuleSetup* m : m_modules) {
+        LOGI() << "doSetup: onInit module: " << m->moduleName();
         m->onInit(runMode);
     }
 
     // ====================================================
     // Setup modules: onAllInited
     // ====================================================
+    LOGI() << "doSetup: onAllInited begin";
     m_globalModule->onAllInited(runMode);
+    LOGI() << "doSetup: onAllInited global done";
     for (modularity::IModuleSetup* m : m_modules) {
+        LOGI() << "doSetup: onAllInited module: " << m->moduleName();
         m->onAllInited(runMode);
     }
+    LOGI() << "doSetup: all onAllInited done";
 
     // ====================================================
     // Setup modules: onStartApp (on next event loop)
@@ -327,29 +337,39 @@ muse::modularity::ContextPtr BaseApplication::setupNewContext(const StringList& 
 
 void BaseApplication::setupContext(const muse::modularity::ContextPtr& ctxId)
 {
+    LOGI() << "setupContext: begin, " << csetups.size() << " modules";
     const IApplication::RunMode runMode = m_appOptions->runMode;
     // Setup
     std::vector<muse::modularity::IContextSetup*>& csetups = contextData(ctxId).setups;
 
+    LOGI() << "setupContext: registerExports loop";
     for (modularity::IContextSetup* s : csetups) {
         s->registerExports();
     }
 
+    LOGI() << "setupContext: resolveImports loop";
     for (modularity::IContextSetup* s : csetups) {
         s->resolveImports();
     }
 
+    LOGI() << "setupContext: onPreInit loop";
     for (modularity::IContextSetup* s : csetups) {
+        LOGI() << "setupContext: onPreInit: " << s->moduleName();
         s->onPreInit(runMode);
     }
 
+    LOGI() << "setupContext: onInit loop";
     for (modularity::IContextSetup* s : csetups) {
+        LOGI() << "setupContext: onInit: " << s->moduleName();
         s->onInit(runMode);
     }
 
+    LOGI() << "setupContext: onAllInited loop";
     for (modularity::IContextSetup* s : csetups) {
+        LOGI() << "setupContext: onAllInited: " << s->moduleName();
         s->onAllInited(runMode);
     }
+    LOGI() << "setupContext: done";
 }
 
 void BaseApplication::destroyContext(const modularity::ContextPtr& ctx)
