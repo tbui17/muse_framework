@@ -34,3 +34,8 @@ QString AccessibilityApi::currentName() const
     const IAccessible* item = accessibilityController()->lastFocused();
     return item ? item->accessibleName() : QString();
 }
+
+QString AccessibilityApi::announcement() const
+{
+    return accessibilityController()->announcement();
+}
