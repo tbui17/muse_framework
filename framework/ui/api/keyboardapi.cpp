@@ -137,9 +137,11 @@ void KeyboardApi::repeatKey(const QString& k, int count)
 
 void KeyboardApi::text(const QString& text)
 {
+    int delay = 10;
     for (const QChar& ch : text) {
-        QTimer::singleShot(10, this, [this, ch]() {
+        QTimer::singleShot(delay, this, [this, ch]() {
             key(ch);
         });
+        delay += 10;
     }
 }
