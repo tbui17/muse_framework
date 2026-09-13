@@ -49,6 +49,11 @@ muse_dependency_populate(harfbuzz "${harfbuzz_output_dir}")
 set(HARFBUZZ_SOURCE_DIR "${harfbuzz_output_dir}/harfbuzz")
 set(HB_HAVE_FREETYPE ON)
 
+# HarfBuzz is licensed under the "Old MIT" license; the Microsoft Uniscribe shaper it
+# embeds under src/ms-use carries its own MIT text.
+include(SetupLicenseNotices)
+muse_install_license_notice(harfbuzz "${HARFBUZZ_SOURCE_DIR}" "COPYING" "src/ms-use/COPYING")
+
 # Checked-in build wrapper, mirroring how SetupFreeType.cmake pulls in its thirdparty
 # directory; it compiles the amalgamated source from HARFBUZZ_SOURCE_DIR.
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/../thirdparty/harfbuzz harfbuzz)

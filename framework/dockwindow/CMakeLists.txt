@@ -55,6 +55,13 @@ set(KDDockWidgets_QTQUICK ON CACHE BOOL "Build for QtQuick instead of QtWidgets"
 set(KDDockWidgets_EXAMPLES OFF CACHE BOOL "Build the examples" FORCE)
 add_subdirectory(thirdparty/KDDockWidgets EXCLUDE_FROM_ALL)
 
+# The compiled KDDockWidgets is this in-tree copy; its own notice install rule runs only
+# when it is configured as the root project, which is not the case here.
+include(SetupLicenseNotices)
+muse_install_license_notice(kddockwidgets "${CMAKE_CURRENT_LIST_DIR}/thirdparty/KDDockWidgets"
+    "LICENSE.txt" "LICENSE.GPL.txt"
+    "LICENSES/GPL-2.0-only.txt" "LICENSES/GPL-3.0-only.txt")
+
 target_link_libraries(muse_dockwindow PRIVATE kddockwidgets)
 
 if (MUSE_MODULE_DOCKWINDOW_QML)

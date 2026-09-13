@@ -30,4 +30,15 @@ if (OS_IS_WIN)
     set(DEPENDENCIES_INC ${DEPENDENCIES_DIR}/include)
 
     message(STATUS "Windows prebuilt dependencies: ${DEPENDENCIES_DIR}")
+
+    # The pinned prebuilt payload carries no notice file, and the Qt binary package does not
+    # include the license texts, so the exact texts of the shipped versions come from the
+    # separate immutable archives pinned under license_notices in the lock file.
+    include(SetupLicenseNotices)
+    populate(license_notices)
+    get_property(license_notices_dir GLOBAL PROPERTY license_notices_SOURCE_DIR)
+    muse_install_license_notice(zlib "${license_notices_dir}/zlib-1.2.8" "README")
+    muse_install_license_notice(libsndfile "${license_notices_dir}/libsndfile-1.0.25" "COPYING")
+    muse_install_license_notice(openssl "${license_notices_dir}/openssl-1.1.1c" "LICENSE")
+    muse_install_license_tree(qt "${license_notices_dir}/qtbase-everywhere-src-6.10.2" "LICENSES" "*.txt")
 endif(OS_IS_WIN)

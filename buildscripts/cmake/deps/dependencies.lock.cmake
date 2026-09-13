@@ -109,3 +109,33 @@ set(MUSE_DEP_vst3sdk_EXPECTED
     "public.sdk/source/vst/hosting/module_win32.cpp"
     "public.sdk/source/vst/utility/stringconvert.h"
 )
+
+
+
+# --- License notice texts (no build products; see deps/license_notices.cmake) ------
+# Three components that ship inside the Windows package carry no notice file in their
+# own pinned payload, and the Qt binary package does not carry the license texts at all,
+# so the exact texts of the shipped versions are pinned separately here:
+#   * zlib 1.2.8, identified by ZLIB_VERSION in the prebuilt payload's include/zlib/zlib.h;
+#     zlib 1.2.8 ships no LICENSE file, its license statement is the text in README.
+#   * libsndfile 1.0.25, identified by the version string in the shipped libsndfile-1.dll.
+#   * OpenSSL 1.1.1c, identified by the version string in the shipped libcrypto/libssl DLLs.
+#   * Qt 6.10.2, the qtbase source archive of the same release, whose LICENSES directory
+#     holds the REUSE-style texts the Qt modules reference.
+# Every hash below was verified on 2026-09-13 by downloading the URL and hashing the bytes;
+# the Qt archive hash was additionally checked against the checksum published next to it.
+set(MUSE_DEP_license_notices_VERSION "2026-09-13")
+set(MUSE_DEP_license_notices_PAYLOADS
+    "single-root|zlib-1.2.8|https://zlib.net/fossils/zlib-1.2.8.tar.gz|36658cb768a54c1d4dec43c3116c27ed893e88b02ecfcb44f2166f9c0b7f2a0d"
+    "single-root|libsndfile-1.0.25|https://github.com/libsndfile/libsndfile/archive/refs/tags/1.0.25.tar.gz|5fc65b356f1458a36a094d3ae89a3e267057e7dea8e288f956f0c6803611cd5b"
+    "single-root|openssl-1.1.1c|https://www.openssl.org/source/old/1.1.1/openssl-1.1.1c.tar.gz|f6fb3079ad15076154eda9413fed42877d668e7069d9b87396d0804fdb3f4c90"
+    "single-root|qtbase-everywhere-src-6.10.2|https://download.qt.io/official_releases/qt/6.10/6.10.2/submodules/qtbase-everywhere-src-6.10.2.tar.xz|aeb78d29291a2b5fd53cb55950f8f5065b4978c25fb1d77f627d695ab9adf21e"
+)
+set(MUSE_DEP_license_notices_EXPECTED
+    "zlib-1.2.8/README"
+    "libsndfile-1.0.25/COPYING"
+    "openssl-1.1.1c/LICENSE"
+    "qtbase-everywhere-src-6.10.2/LICENSES/LGPL-3.0-only.txt"
+    "qtbase-everywhere-src-6.10.2/LICENSES/GPL-3.0-only.txt"
+    "qtbase-everywhere-src-6.10.2/LICENSES/Qt-GPL-exception-1.0.txt"
+)

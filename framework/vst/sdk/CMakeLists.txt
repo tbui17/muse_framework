@@ -36,6 +36,14 @@ else()
 
     set(VST3_SDK_PATH "${_vst3sdk_output_dir}")
 
+    # Each of the three SDK repositories carries the same Steinberg license text.
+    include(SetupLicenseNotices)
+    muse_install_license_notice(vst3sdk "${_vst3sdk_output_dir}"
+        "base/LICENSE.txt"
+        "pluginterfaces/LICENSE.txt"
+        "public.sdk/LICENSE.txt"
+    )
+
 endif()
 
 include(GetPlatformInfo)
