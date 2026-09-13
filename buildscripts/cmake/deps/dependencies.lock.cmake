@@ -120,8 +120,12 @@ set(MUSE_DEP_vst3sdk_EXPECTED
 #     zlib 1.2.8 ships no LICENSE file, its license statement is the text in README.
 #   * libsndfile 1.0.25, identified by the version string in the shipped libsndfile-1.dll.
 #   * OpenSSL 1.1.1c, identified by the version string in the shipped libcrypto/libssl DLLs.
-#   * Qt 6.10.2, the qtbase source archive of the same release, whose LICENSES directory
-#     holds the REUSE-style texts the Qt modules reference.
+#   * Qt 6.10.2, the source archives of the shipped modules (qtbase, qtdeclarative, qtsvg,
+#     qttools, qttranslations, qt5compat, qtnetworkauth, qtshadertools, qtwebsockets), whose
+#     LICENSES sets, REUSE/attribution files and third-party notices are installed per module.
+#   * GNU FreeFont 20120503, whose GPL-3.0 text and font-exception README ship with the fonts
+#     that are embedded in the executable; the shipped FreeSans.ttf/FreeSerif.ttf are
+#     byte-identical to this release asset.
 # Every hash below was verified on 2026-09-13 by downloading the URL and hashing the bytes;
 # the Qt archive hash was additionally checked against the checksum published next to it.
 set(MUSE_DEP_license_notices_VERSION "2026-09-13")
@@ -129,7 +133,16 @@ set(MUSE_DEP_license_notices_PAYLOADS
     "single-root|zlib-1.2.8|https://zlib.net/fossils/zlib-1.2.8.tar.gz|36658cb768a54c1d4dec43c3116c27ed893e88b02ecfcb44f2166f9c0b7f2a0d"
     "single-root|libsndfile-1.0.25|https://github.com/libsndfile/libsndfile/archive/refs/tags/1.0.25.tar.gz|5fc65b356f1458a36a094d3ae89a3e267057e7dea8e288f956f0c6803611cd5b"
     "single-root|openssl-1.1.1c|https://www.openssl.org/source/old/1.1.1/openssl-1.1.1c.tar.gz|f6fb3079ad15076154eda9413fed42877d668e7069d9b87396d0804fdb3f4c90"
+    "single-root|freefont-20120503|https://ftp.gnu.org/gnu/freefont/freefont-ttf-20120503.zip|7c85baf1bf82a1a1845d1322112bc6ca982221b484e3b3925022e25b5cae89af"
     "single-root|qtbase-everywhere-src-6.10.2|https://download.qt.io/official_releases/qt/6.10/6.10.2/submodules/qtbase-everywhere-src-6.10.2.tar.xz|aeb78d29291a2b5fd53cb55950f8f5065b4978c25fb1d77f627d695ab9adf21e"
+    "single-root|qtdeclarative-everywhere-src-6.10.2|https://download.qt.io/official_releases/qt/6.10/6.10.2/submodules/qtdeclarative-everywhere-src-6.10.2.tar.xz|a249914ff66cdcdbf0df8b5ffad997a2ee6dce01cc17d43c6cc56fdc1d0f4b0f"
+    "single-root|qtsvg-everywhere-src-6.10.2|https://download.qt.io/official_releases/qt/6.10/6.10.2/submodules/qtsvg-everywhere-src-6.10.2.tar.xz|f07ff80f38caf235187200345392ca7479445ddf49a36c3694cd52a735dad6e1"
+    "single-root|qttools-everywhere-src-6.10.2|https://download.qt.io/official_releases/qt/6.10/6.10.2/submodules/qttools-everywhere-src-6.10.2.tar.xz|1e3d2c07c1fd76d2425c6eaeeaa62ffaff5f79210c4e1a5bc2a6a9db668d5b24"
+    "single-root|qttranslations-everywhere-src-6.10.2|https://download.qt.io/official_releases/qt/6.10/6.10.2/submodules/qttranslations-everywhere-src-6.10.2.tar.xz|b3b3813bc9d76b545716dc8b6e659fa71b6e2bc14569e9fab6dab8b30650a644"
+    "single-root|qt5compat-everywhere-src-6.10.2|https://download.qt.io/official_releases/qt/6.10/6.10.2/submodules/qt5compat-everywhere-src-6.10.2.tar.xz|3fa418f0fac02eb9efc5f762fbe25f20647b0ebb7fa92faf07e6de85044161c2"
+    "single-root|qtnetworkauth-everywhere-src-6.10.2|https://download.qt.io/official_releases/qt/6.10/6.10.2/submodules/qtnetworkauth-everywhere-src-6.10.2.tar.xz|4f29fd9e4b505f5714fc42296b04c701f66ced185c49de4d520cb8de4b1981b3"
+    "single-root|qtshadertools-everywhere-src-6.10.2|https://download.qt.io/official_releases/qt/6.10/6.10.2/submodules/qtshadertools-everywhere-src-6.10.2.tar.xz|18d9dbbc4f7e6e96e6ed89a9965dc032e2b58158b65156c035537826216716c9"
+    "single-root|qtwebsockets-everywhere-src-6.10.2|https://download.qt.io/official_releases/qt/6.10/6.10.2/submodules/qtwebsockets-everywhere-src-6.10.2.tar.xz|eccc751bea509ef656d20029693987a0fc03c58e21c38f1351480f3c8eb42ebd"
 )
 set(MUSE_DEP_license_notices_EXPECTED
     "zlib-1.2.8/README"
@@ -138,4 +151,22 @@ set(MUSE_DEP_license_notices_EXPECTED
     "qtbase-everywhere-src-6.10.2/LICENSES/LGPL-3.0-only.txt"
     "qtbase-everywhere-src-6.10.2/LICENSES/GPL-3.0-only.txt"
     "qtbase-everywhere-src-6.10.2/LICENSES/Qt-GPL-exception-1.0.txt"
+    "freefont-20120503/COPYING"
+    "freefont-20120503/README"
+    "qtbase-everywhere-src-6.10.2/src/dbus/LICENSE.LIBDBUS-1.txt"
+    "qtbase-everywhere-src-6.10.2/src/3rdparty/freetype/LICENSE.txt"
+    "qtbase-everywhere-src-6.10.2/src/3rdparty/harfbuzz-ng/COPYING"
+    "qtbase-everywhere-src-6.10.2/src/3rdparty/libpng/LICENSE"
+    "qtbase-everywhere-src-6.10.2/src/3rdparty/zlib/LICENSE"
+    "qtbase-everywhere-src-6.10.2/LICENSES/LGPL-3.0-only.txt"
+    "qtdeclarative-everywhere-src-6.10.2/src/3rdparty/yoga/LICENSE"
+    "qtsvg-everywhere-src-6.10.2/src/svg/LICENSE.XSVG.txt"
+    "qttools-everywhere-src-6.10.2/src/assistant/qlitehtml/src/3rdparty/litehtml/LICENSE"
+    "qttools-everywhere-src-6.10.2/src/qdoc/catch/LICENSE.CATCH.txt"
+    "qt5compat-everywhere-src-6.10.2/src/core5/codecs/LICENSE.QBIG5CODEC.txt"
+    "qtshadertools-everywhere-src-6.10.2/src/3rdparty/glslang/LICENSE.txt"
+    "qtshadertools-everywhere-src-6.10.2/src/3rdparty/SPIRV-Cross/LICENSE"
+    "qtwebsockets-everywhere-src-6.10.2/LICENSES/LGPL-3.0-only.txt"
+    "qtnetworkauth-everywhere-src-6.10.2/LICENSES/BSD-3-Clause.txt"
+    "qttranslations-everywhere-src-6.10.2/LICENSES/GPL-3.0-only.txt"
 )

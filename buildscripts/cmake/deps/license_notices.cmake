@@ -17,8 +17,9 @@
 #     LICENSE file, the license text is the statement in its root README.
 #   * libsndfile 1.0.25 (libsndfile-1.dll in musescore_prebuild_win_deps).
 #   * OpenSSL 1.1.1c (libcrypto/libssl DLLs shipped next to libsndfile).
-#   * Qt 6.10.2 (qtbase source archive), whose LICENSES directory holds the
-#     REUSE-style license texts the Qt modules reference.
+#   * Qt 6.10.2 shipped modules (qtbase, qtdeclarative, qtsvg, qttools,
+#     qttranslations, qt5compat, qtnetworkauth, qtshadertools, qtwebsockets), whose
+#     source archives provide the per-module LICENSES, REUSE and attribution records.
 #
 # The payloads carry no build products: only notice texts are installed from them.
 

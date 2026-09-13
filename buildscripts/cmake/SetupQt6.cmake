@@ -89,10 +89,6 @@ find_package(Qt6 6.8 REQUIRED COMPONENTS ${qt_components})
 
 include(QtInstallPaths)
 
-# Qt attribution metadata of the installed modules (see SetupLicenseNotices.cmake).
-include(SetupLicenseNotices)
-muse_install_qt_attribution("${QT_INSTALL_PREFIX}")
-
 message(STATUS "Qt version: ${Qt6_VERSION}")
 
 qt_standard_project_setup(REQUIRES 6.8 SUPPORTS_UP_TO 6.10)

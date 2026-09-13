@@ -40,5 +40,17 @@ if (OS_IS_WIN)
     muse_install_license_notice(zlib "${license_notices_dir}/zlib-1.2.8" "README")
     muse_install_license_notice(libsndfile "${license_notices_dir}/libsndfile-1.0.25" "COPYING")
     muse_install_license_notice(openssl "${license_notices_dir}/openssl-1.1.1c" "LICENSE")
-    muse_install_license_tree(qt "${license_notices_dir}/qtbase-everywhere-src-6.10.2" "LICENSES" "*.txt")
+
+    # GNU FreeFont is embedded through qrc; the shipped FreeSans/FreeSerif files are
+    # byte-identical to the 20120503 release, whose COPYING is GPL-3.0 and whose README
+    # carries the font exception.
+    muse_install_license_notice(freefont "${license_notices_dir}/freefont-20120503"
+        "COPYING" "README" "AUTHORS")
+
+    # Per-module Qt notices and attribution from the pinned source archives of the modules
+    # the workflow installs (qtbase, qtsvg, qtdeclarative, qttools, qttranslations plus the
+    # qt5compat / qtnetworkauth / qtshadertools / qtwebsockets addons).
+    muse_install_qt_module_notices("${license_notices_dir}"
+        qtbase qtdeclarative qtsvg qttools qttranslations
+        qt5compat qtnetworkauth qtshadertools qtwebsockets)
 endif(OS_IS_WIN)

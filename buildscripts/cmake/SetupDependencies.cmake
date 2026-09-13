@@ -72,5 +72,10 @@ muse_install_source_index(
     "src/engraving/thirdparty/dtl|dtl, in-tree"
     "src/importexport/midi/thirdparty/beatroot|beatroot, in-tree"
     "src/importexport/capella/thirdparty/rtf2html|rtf2html, in-tree"
+    "src/importexport/mei/thirdparty/libmei|Verovio libmei generated sources, in-tree"
+    "src/importexport/mnx|mnxdom, fetched at commit e7c947bf768caccf315426dcae0dfac02caf738b"
     "fonts|embedded fonts and their OFL texts, in-tree"
+    "fonts/FreeSans.ttf, fonts/FreeSerif.ttf|GNU FreeFont 20120503, byte-identical to the pinned release asset"
+    "Qt module sources|notices and attribution installed per shipped module from the pinned Qt 6.10.2 archives"
+    "Qt binary packages|Qt 6.10.2 win64_msvc2022_64, deployed by windeployqt"
 )
