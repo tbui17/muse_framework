@@ -18,57 +18,24 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-# Config
-include(GetPlatformInfo)
-include(GetBuildType)
+# Dependency bootstrap.
+#
+# Recipe location and payload location are separate on purpose:
+#   * reviewed recipes are checked in under buildscripts/cmake/deps and are never
+#     downloaded from a remote branch at configure time
+#   * pinned payload URLs and SHA-256 live in buildscripts/cmake/deps/dependencies.lock.cmake
+#   * payloads are materialised under the build tree, one directory per dependency
+#     (FETCHCONTENT_BASE_DIR/<name>), so the vendored recipe directory stays read-only
+#
+# See DependencyPayload.cmake for the download/verify/extract requirements.
 
-set(LIB_OS )
-if (OS_IS_WIN)
-    set(LIB_OS "windows")
-elseif(OS_IS_LIN)
-    set(LIB_OS "linux")
-elseif(OS_IS_FBSD)
-    set(LIB_OS "linux")
-elseif(OS_IS_MAC)
-    set(LIB_OS "macos")
-    list(LENGTH CMAKE_OSX_ARCHITECTURES arch_count)
-    if(arch_count GREATER 1)
-        set(ARCH "universal")
-    endif()
-endif()
+include("${CMAKE_CURRENT_LIST_DIR}/DependencyPayload.cmake")
 
-set(LIB_ARCH ${ARCH})
+function(populate name)
+    muse_dependency_output_dir(${name} local_path)
 
-if (BUILD_IS_RELEASE)
-    set(LIB_BUILD_TYPE "release")
-else()
-    set(LIB_BUILD_TYPE "debug")
-endif()
-
-set(REMOTE_ROOT_URL https://raw.githubusercontent.com/musescore/muse_deps/main)
-set(LOCAL_ROOT_PATH ${FETCHCONTENT_BASE_DIR})
-
-# Vendored .cmake files for when muse_deps is unavailable (CI)
-set(VENDORED_DEPS_DIR ${CMAKE_CURRENT_LIST_DIR}/deps)
-
-function(populate name remote_suffix)
-    set(remote_url ${REMOTE_ROOT_URL}/${remote_suffix})
-    set(local_path ${LOCAL_ROOT_PATH}/${name})
-
-    # Try vendored copy first — avoids 404 from restructured muse_deps repo
-    if (EXISTS ${VENDORED_DEPS_DIR}/${name}.cmake)
-        set(local_path ${VENDORED_DEPS_DIR})
-    elseif (NOT EXISTS ${local_path}/${name}.cmake)
-        file(MAKE_DIRECTORY ${local_path})
-        file(DOWNLOAD ${remote_url}/${name}.cmake ${local_path}/${name}.cmake
-            HTTPHEADER "Cache-Control: no-cache"
-        )
-    endif()
-
-    include(${local_path}/${name}.cmake)
-
-    # func from ${name}.cmake
-    cmake_language(CALL ${name}_Populate ${remote_url} ${local_path} ${LIB_OS} ${LIB_ARCH} ${LIB_BUILD_TYPE})
+    # Reviewed recipe + explicit check that it defines <name>_Populate.
+    muse_dependency_populate(${name} "${local_path}")
 
     get_property(include_dirs GLOBAL PROPERTY ${name}_INCLUDE_DIRS)
     get_property(libraries GLOBAL PROPERTY ${name}_LIBRARIES)

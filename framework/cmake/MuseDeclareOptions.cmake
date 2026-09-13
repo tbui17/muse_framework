@@ -106,6 +106,16 @@ option(MUSE_COMPILE_BUILD_64 "Build 64 bit version" ON)
 option(MUSE_COMPILE_ASAN "Enable Address Sanitizer" OFF)
 option(MUSE_COMPILE_USE_PCH "Use precompiled headers." ON)
 
+# Compiler cache autodetection. A false environment value becomes the default so that
+# wrapper scripts which do not forward CMake options can still disable it; an explicit
+# -DMUSE_COMPILE_USE_COMPILER_CACHE=ON takes precedence over the environment.
+set(_muse_compiler_cache_default ON)
+if (DEFINED ENV{MUSE_COMPILE_USE_COMPILER_CACHE} AND NOT "$ENV{MUSE_COMPILE_USE_COMPILER_CACHE}")
+    set(_muse_compiler_cache_default OFF)
+endif()
+option(MUSE_COMPILE_USE_COMPILER_CACHE "Try to use compiler cache: tries ccache, sccache, buildcache in that order. Use COMPILER_CACHE_PROGRAM to specify a specific compiler cache program." ${_muse_compiler_cache_default})
+unset(_muse_compiler_cache_default)
+
 # === Debug options ===
 option(MUSE_COMPILE_STRING_DEBUG_HACK "Enable string debug hack (only clang)" ON)
 option(MUSE_LOAD_QML_FROM_SOURCE "Load QML from source files instead of compiled resources (for development and debugging)" OFF)

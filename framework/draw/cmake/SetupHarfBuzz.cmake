@@ -35,38 +35,23 @@ if (MUSE_USE_SYSTEM_HARFBUZZ)
 endif()
 
 # If not MUSE_USE_SYSTEM_HARFBUZZ, or if it was not found,
-# download and build harfbuzz
+# use the pinned HarfBuzz source.
+#
+# The reviewed recipe is buildscripts/cmake/deps/harfbuzz.cmake; its payload URL and
+# SHA-256 are pinned in buildscripts/cmake/deps/dependencies.lock.cmake. The source is
+# extracted into the build tree, while the MuseScore build wrapper (which compiles the
+# amalgamated harfbuzz.cc) is checked in at framework/draw/thirdparty/harfbuzz.
+include(DependencyPayload)
 
-set(REMOTE_ROOT_URL https://raw.githubusercontent.com/musescore/muse_deps/main)
-set(remote_url ${REMOTE_ROOT_URL}/harfbuzz/12.3.0)
+muse_dependency_output_dir(harfbuzz harfbuzz_output_dir)
+muse_dependency_populate(harfbuzz "${harfbuzz_output_dir}")
 
-# Source tree: vendored .cmake + source archive (avoids 404 from
-# restructured muse_deps repo). Build dir: extraction target (writable).
-set(VENDORED_DEPS_DIR ${MUSE_FRAMEWORK_PATH}/buildscripts/cmake/deps)
-set(local_path ${PROJECT_BINARY_DIR}/_deps/harfbuzz)
-
-if (NOT EXISTS ${local_path}/harfbuzz.cmake)
-    file(MAKE_DIRECTORY ${local_path})
-    if (EXISTS ${VENDORED_DEPS_DIR}/harfbuzz.cmake)
-        file(COPY ${VENDORED_DEPS_DIR}/harfbuzz.cmake DESTINATION ${local_path})
-        if (EXISTS ${VENDORED_DEPS_DIR}/harfbuzz_src.7z)
-            file(COPY ${VENDORED_DEPS_DIR}/harfbuzz_src.7z DESTINATION ${local_path})
-        endif()
-    else()
-        file(DOWNLOAD ${remote_url}/harfbuzz.cmake ${local_path}/harfbuzz.cmake
-            HTTPHEADER "Cache-Control: no-cache"
-        )
-    endif()
-endif()
-
-include(${local_path}/harfbuzz.cmake)
-
-# func from ${name}.cmake)
-cmake_language(CALL harfbuzz_Populate ${remote_url} ${local_path} "source" "" "")
-
+set(HARFBUZZ_SOURCE_DIR "${harfbuzz_output_dir}/harfbuzz")
 set(HB_HAVE_FREETYPE ON)
 
-add_subdirectory(${local_path}/harfbuzz harfbuzz)
+# Checked-in build wrapper, mirroring how SetupFreeType.cmake pulls in its thirdparty
+# directory; it compiles the amalgamated source from HARFBUZZ_SOURCE_DIR.
+add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/../thirdparty/harfbuzz harfbuzz)
 
 target_no_warning(harfbuzz -Wno-conversion)
 target_no_warning(harfbuzz -Wno-unused-parameter)
@@ -77,4 +62,4 @@ target_no_warning(harfbuzz -WMSVC-no-unreachable)
 #add_subdirectory(thirdparty/msdfgen)
 
 set(HARFBUZZ_LIBRARIES harfbuzz)
-set(HARFBUZZ_INCLUDE_DIRS ${local_path}/harfbuzz/harfbuzz/src)
+set(HARFBUZZ_INCLUDE_DIRS ${HARFBUZZ_SOURCE_DIR}/src)

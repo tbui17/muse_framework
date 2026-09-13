@@ -23,9 +23,9 @@ message(STATUS "Setup dependencies")
 include(MuseDeps)
 
 if (MUSE_MODULE_DOCKWINDOW_KDDOCKWIDGETS_V2)
-    populate(kddockwidgets "kddockwidgets/2.4")
+    populate(kddockwidgets)
 endif()
 
 if (MUSE_MODULE_AUDIO_EXPORT)
-    populate(fdk-aac "fdk-aac/2.0.3")
+    populate(fdk-aac)
 endif()

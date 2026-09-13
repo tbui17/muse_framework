@@ -18,6 +18,15 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+# Explicit opt-out. MUSE_COMPILE_USE_COMPILER_CACHE is declared in
+# framework/cmake/MuseDeclareOptions.cmake and the callers guard on it as well, but the
+# module stays self-contained: including it directly must not silently re-enable compiler
+# cache autodetection that the driver asked to turn off.
+if (DEFINED MUSE_COMPILE_USE_COMPILER_CACHE AND NOT MUSE_COMPILE_USE_COMPILER_CACHE)
+    message(STATUS "Compiler cache autodetection disabled (MUSE_COMPILE_USE_COMPILER_CACHE=OFF)")
+    return()
+endif()
+
 if (CMAKE_C_COMPILER_LAUNCHER OR CMAKE_CXX_COMPILER_LAUNCHER)
     message(WARNING "CMAKE_C_COMPILER_LAUNCHER or CMAKE_CXX_COMPILER_LAUNCHER have already been set; not setting up compiler cache in order not to override them.")
     return()

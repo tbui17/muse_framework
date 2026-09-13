@@ -1,19 +1,14 @@
+# SPDX-License-Identifier: GPL-3.0-only
+# MuseScore-Studio-CLA-applies
+#
+# MuseScore Studio
+# Music Composition & Notation
+#
+# Copyright (C) 2026 MuseScore Limited
+#
+# Reviewed recipe for the ASIO SDK (Windows only). The SDK zip is pinned with its
+# SHA-256 in dependencies.lock.cmake; it is extracted to <local_path>/ASIOSDK.
 
-function(asiosdk_Populate remote_url local_path os arch build_type)
-
-    if(os STREQUAL "source")
-
-            set(name "ASIO-SDK_2.3.4_2025-10-15.zip")
-
-            if (NOT EXISTS ${local_path}/${name})
-                message(STATUS "[asiosdk] Populate: ${remote_url} to ${local_path} ${os} ${arch} ${build_type}")
-                file(DOWNLOAD ${remote_url}/${name} ${local_path}/${name})
-                file(ARCHIVE_EXTRACT INPUT ${local_path}/${name} DESTINATION ${local_path})
-            endif()
-
-    else()
-        message(FATAL_ERROR "[asiosdk] Not supported os: ${os}")
-    endif()
-
+function(asiosdk_Populate local_path)
+    muse_dependency_payload(asiosdk "${local_path}")
 endfunction()
-

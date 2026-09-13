@@ -5,32 +5,15 @@ if(MUSE_MODULE_AUDIO_ASIO_SDK_PATH)
     set(ASIO_SDK_PATH ${MUSE_MODULE_AUDIO_ASIO_SDK_PATH})
 else()
 
-    # If not set MUSE_MODULE_AUDIO_ASIO_SDK_PATH
-    # download asiosdk source
+    # If not set MUSE_MODULE_AUDIO_ASIO_SDK_PATH use the pinned ASIO SDK.
+    # The reviewed recipe is buildscripts/cmake/deps/asiosdk.cmake; its payload URL and
+    # SHA-256 are pinned in buildscripts/cmake/deps/dependencies.lock.cmake.
+    include(DependencyPayload)
 
-    set(REMOTE_ROOT_URL https://raw.githubusercontent.com/musescore/muse_deps/main)
-    set(remote_url "${REMOTE_ROOT_URL}/asiosdk/ASIO-SDK_2.3.4_2025-10-15")
+    muse_dependency_output_dir(asiosdk _asio_output_dir)
+    muse_dependency_populate(asiosdk "${_asio_output_dir}")
 
-    # Try vendored copy first — avoids 404 from restructured muse_deps repo
-    set(VENDORED_DEPS_DIR ${MUSE_FRAMEWORK_PATH}/buildscripts/cmake/deps)
-    if (EXISTS ${VENDORED_DEPS_DIR}/asiosdk.cmake)
-        set(local_path ${VENDORED_DEPS_DIR})
-    else()
-        set(local_path ${PROJECT_BINARY_DIR}/_deps/asiosdk)
-        if (NOT EXISTS ${local_path}/asiosdk.cmake)
-            file(MAKE_DIRECTORY ${local_path})
-            file(DOWNLOAD ${remote_url}/asiosdk.cmake ${local_path}/asiosdk.cmake
-                HTTPHEADER "Cache-Control: no-cache"
-            )
-        endif()
-    endif()
-
-    include(${local_path}/asiosdk.cmake)
-
-    # func from ${name}.cmake)
-    cmake_language(CALL asiosdk_Populate ${remote_url} ${local_path} "source" "" "")
-
-    set(ASIO_SDK_PATH ${local_path})
+    set(ASIO_SDK_PATH "${_asio_output_dir}")
     message(STATUS "ASIO_SDK_PATH: ${ASIO_SDK_PATH}")
 
 endif()

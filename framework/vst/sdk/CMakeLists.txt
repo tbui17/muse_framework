@@ -24,25 +24,17 @@ if(MUSE_MODULE_VST_VST3_SDK_PATH)
     set(VST3_SDK_PATH ${MUSE_MODULE_VST_VST3_SDK_PATH})
 else()
 
-    # If not set MUSE_MODULE_VST_VST3_SDK_PATH
-    # download vst3sdk source
+    # If not set MUSE_MODULE_VST_VST3_SDK_PATH use the pinned VST 3 SDK.
+    # The reviewed recipe is buildscripts/cmake/deps/vst3sdk.cmake; its payload URLs and
+    # SHA-256 are pinned in buildscripts/cmake/deps/dependencies.lock.cmake. The SDK is
+    # assembled from three upstream repositories nested as siblings below VST3_SDK_PATH.
 
-    set(REMOTE_ROOT_URL https://raw.githubusercontent.com/musescore/muse_deps/main)
-    set(remote_url ${REMOTE_ROOT_URL}/vst3sdk/v3.7.12_build_20)
-    set(local_path ${PROJECT_BINARY_DIR}/_deps/vst3sdk)
-    if (NOT EXISTS ${local_path}/vst3sdk.cmake)
-        file(MAKE_DIRECTORY ${local_path})
-        file(DOWNLOAD ${remote_url}/vst3sdk.cmake ${local_path}/vst3sdk.cmake
-            HTTPHEADER "Cache-Control: no-cache"
-        )
-    endif()
+    include(DependencyPayload)
 
-    include(${local_path}/vst3sdk.cmake)
+    muse_dependency_output_dir(vst3sdk _vst3sdk_output_dir)
+    muse_dependency_populate(vst3sdk "${_vst3sdk_output_dir}")
 
-    # func from ${name}.cmake)
-    cmake_language(CALL vst3sdk_Populate ${remote_url} ${local_path} "source" "" "")
-
-    set(VST3_SDK_PATH ${local_path})
+    set(VST3_SDK_PATH "${_vst3sdk_output_dir}")
 
 endif()
 
