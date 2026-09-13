@@ -48,12 +48,21 @@ function(muse_dependency_lock_get name key out_var)
 endfunction()
 
 # Output directory for one dependency's payloads, under the build tree.
+#
+# The framework is included from the application's early setup, before the application assigns
+# FETCHCONTENT_BASE_DIR, and a standalone build may leave it to FetchContent. Fall back to the
+# same "<binary dir>/_deps" location the application configures, instead of failing on include
+# order; the explicit variable still wins when it is set.
 function(muse_dependency_output_dir name out_var)
-    if (NOT FETCHCONTENT_BASE_DIR)
+    if (DEFINED FETCHCONTENT_BASE_DIR AND NOT FETCHCONTENT_BASE_DIR STREQUAL "")
+        set(_base_dir "${FETCHCONTENT_BASE_DIR}")
+    elseif (DEFINED PROJECT_BINARY_DIR AND NOT PROJECT_BINARY_DIR STREQUAL "")
+        set(_base_dir "${PROJECT_BINARY_DIR}/_deps")
+    else()
         message(FATAL_ERROR
-            "[deps] FETCHCONTENT_BASE_DIR is not set; the dependency payload output directory cannot be resolved")
+            "[deps] neither FETCHCONTENT_BASE_DIR nor PROJECT_BINARY_DIR is set; the dependency payload output directory cannot be resolved")
     endif()
-    set(${out_var} "${FETCHCONTENT_BASE_DIR}/${name}" PARENT_SCOPE)
+    set(${out_var} "${_base_dir}/${name}" PARENT_SCOPE)
 endfunction()
 
 # Set <out_ok> TRUE when <payload_file> exists and its SHA-256 equals <expected_sha256>.
