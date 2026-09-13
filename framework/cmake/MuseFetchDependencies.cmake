@@ -35,7 +35,8 @@ if (OS_IS_WIN)
     # include the license texts, so the exact texts of the shipped versions come from the
     # separate immutable archives pinned under license_notices in the lock file.
     include(SetupLicenseNotices)
-    populate(license_notices)
+    muse_dependency_output_dir(license_notices _license_notices_output_dir)
+    muse_dependency_populate(license_notices "${_license_notices_output_dir}")
     get_property(license_notices_dir GLOBAL PROPERTY license_notices_SOURCE_DIR)
     muse_install_license_notice(zlib "${license_notices_dir}/zlib-1.2.8" "README")
     muse_install_license_notice(libsndfile "${license_notices_dir}/libsndfile-1.0.25" "COPYING")
