@@ -32,9 +32,11 @@ if (NOT FREETYPE_FOUND)
     # sets FREETYPE_LIBRARIES and FREETYPE_INCLUDE_DIRS
     add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/../thirdparty/freetype freetype)
 
-    # FreeType is offered under the FreeType License or GPL-2.0; both texts ship with it.
-    include(SetupLicenseNotices)
-    muse_install_license_notice(freetype
-        "${CMAKE_CURRENT_LIST_DIR}/../thirdparty/freetype/freetype-2.14.1"
-        "LICENSE.TXT" "docs/FTL.TXT" "docs/GPLv2.TXT")
+    if (MUSE_APP_INSTALL_RESOURCES_LOCATION)
+        # FreeType is offered under the FreeType License or GPL-2.0; both texts ship with it.
+        include(SetupLicenseNotices)
+        muse_install_license_notice(freetype
+            "${CMAKE_CURRENT_LIST_DIR}/../thirdparty/freetype/freetype-2.14.1"
+            "LICENSE.TXT" "docs/FTL.TXT" "docs/GPLv2.TXT")
+    endif()
 endif()

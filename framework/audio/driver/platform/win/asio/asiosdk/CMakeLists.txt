@@ -16,15 +16,17 @@ else()
     set(ASIO_SDK_PATH "${_asio_output_dir}")
     message(STATUS "ASIO_SDK_PATH: ${ASIO_SDK_PATH}")
 
-    # The ASIO SDK is offered under the Steinberg ASIO license or GPL-3.0; the payload
-    # carries the text at its root and next to the common headers, plus the signed
-    # Steinberg ASIO Licensing Agreement.
-    include(SetupLicenseNotices)
-    muse_install_license_notice(asiosdk "${_asio_output_dir}/ASIOSDK"
-        "LICENSE.txt"
-        "common/LICENSE.txt"
-        "Steinberg ASIO Licensing Agreement.pdf"
-    )
+    if (MUSE_APP_INSTALL_RESOURCES_LOCATION)
+        # The ASIO SDK is offered under the Steinberg ASIO license or GPL-3.0; the payload
+        # carries the text at its root and next to the common headers, plus the signed
+        # Steinberg ASIO Licensing Agreement.
+        include(SetupLicenseNotices)
+        muse_install_license_notice(asiosdk "${_asio_output_dir}/ASIOSDK"
+            "LICENSE.txt"
+            "common/LICENSE.txt"
+            "Steinberg ASIO Licensing Agreement.pdf"
+        )
+    endif()
 
 endif()
 

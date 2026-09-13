@@ -187,13 +187,15 @@ else()
     add_subdirectory(../thirdparty/fluidsynth fluidsynth)
     target_link_libraries(muse_audio_engine PRIVATE fluidsynth)
 
-    include(SetupLicenseNotices)
-    muse_install_license_notice(fluidsynth
-        "${CMAKE_CURRENT_LIST_DIR}/../thirdparty/fluidsynth/fluidsynth-2.3.3"
-        "LICENSE")
-    # stb_vorbis is compiled into the engine through a direct #include; it ships its
-    # public-domain dedication inside the source file, which is the notice to install.
-    muse_install_license_notice(stb-vorbis "${CMAKE_CURRENT_LIST_DIR}/../thirdparty/stb" "stb_vorbis.c")
+    if (MUSE_APP_INSTALL_RESOURCES_LOCATION)
+        include(SetupLicenseNotices)
+        muse_install_license_notice(fluidsynth
+            "${CMAKE_CURRENT_LIST_DIR}/../thirdparty/fluidsynth/fluidsynth-2.3.3"
+            "LICENSE")
+        # stb_vorbis is compiled into the engine through a direct #include; it ships its
+        # public-domain dedication inside the source file, which is the notice to install.
+        muse_install_license_notice(stb-vorbis "${CMAKE_CURRENT_LIST_DIR}/../thirdparty/stb" "stb_vorbis.c")
+    endif()
 endif() # End of real engine
 
 if (MUSE_MODULE_AUDIO_EXPORT)
@@ -248,14 +250,16 @@ if (MUSE_MODULE_AUDIO_EXPORT)
     include(../cmake/SetupFlac.cmake)
     target_link_libraries(muse_audio_engine PRIVATE ${FLAC_TARGETS})
 
-    # Vendored encoders linked statically into the export path.
-    include(SetupLicenseNotices)
-    muse_install_license_notice(lame "${CMAKE_CURRENT_LIST_DIR}/../thirdparty/lame" "LICENSE" "COPYING")
-    muse_install_license_notice(flac "${CMAKE_CURRENT_LIST_DIR}/../thirdparty/flac/flac-1.4.3"
-        "COPYING.Xiph" "COPYING.LGPL" "COPYING.GPL" "COPYING.FDL")
-    muse_install_license_notice(opus "${CMAKE_CURRENT_LIST_DIR}/../thirdparty/opus/opus-1.5.2" "COPYING")
-    muse_install_license_notice(libopusenc
-        "${CMAKE_CURRENT_LIST_DIR}/../thirdparty/opusenc/libopusenc-0.2.1" "COPYING")
+    if (MUSE_APP_INSTALL_RESOURCES_LOCATION)
+        # Vendored encoders linked statically into the export path.
+        include(SetupLicenseNotices)
+        muse_install_license_notice(lame "${CMAKE_CURRENT_LIST_DIR}/../thirdparty/lame" "LICENSE" "COPYING")
+        muse_install_license_notice(flac "${CMAKE_CURRENT_LIST_DIR}/../thirdparty/flac/flac-1.4.3"
+            "COPYING.Xiph" "COPYING.LGPL" "COPYING.GPL" "COPYING.FDL")
+        muse_install_license_notice(opus "${CMAKE_CURRENT_LIST_DIR}/../thirdparty/opus/opus-1.5.2" "COPYING")
+        muse_install_license_notice(libopusenc
+            "${CMAKE_CURRENT_LIST_DIR}/../thirdparty/opusenc/libopusenc-0.2.1" "COPYING")
+    endif()
 
     target_link_libraries(muse_audio_engine PRIVATE fdk-aac)
 
