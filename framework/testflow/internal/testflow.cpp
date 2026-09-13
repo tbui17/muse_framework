@@ -57,6 +57,13 @@ void Testflow::init()
     });
 
     m_runner.allFinished().onReceive(this, [this](bool aborted) {
+        //! NOTE An abort that lands between steps must not leave the status at Running:
+        //! execScript() promotes Running to Finished and the GUI test runner reports that as
+        //! a pass. Error/Aborted step statuses have already set the status themselves.
+        if (aborted && (m_status == Status::Running || m_status == Status::Paused)) {
+            setStatus(Status::Aborted);
+        }
+
         m_report.endReport(aborted);
     });
 
@@ -261,7 +268,22 @@ int Testflow::intervalMsec() const
 
 void Testflow::runTestCase(const TestCase& testCase)
 {
-    m_report.beginReport(testCase);
+    //! NOTE A test case without steps would run nothing and never signal allFinished(), so the
+    //! caller would promote the still-Running status to Finished and report a pass.
+    if (testCase.steps().count() <= 0) {
+        LOGE() << "refusing to run a test case without steps: " << testCase.name();
+        setStatus(Status::Error);
+        return;
+    }
+
+    Ret ret = m_report.beginReport(testCase);
+    if (!ret) {
+        //! NOTE Without a report there is no evidence that the test case ran.
+        LOGE() << "failed to begin the report for test case: " << testCase.name() << ", err: " << ret.toString();
+        setStatus(Status::Error);
+        return;
+    }
+
     m_runner.run(testCase);
 }
 
