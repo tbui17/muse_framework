@@ -85,14 +85,18 @@ endif()
 
 if (MUSE_APP_INSTALL_RESOURCES_LOCATION)
     get_property(_picojson_source_dir GLOBAL PROPERTY picojson_SOURCE_DIR)
-    muse_install_license_notice(picojson "${_picojson_source_dir}/picojson" "LICENSE")
+    muse_install_license_notice(picojson "${_picojson_source_dir}/picojson"
+        "LICENSE"
+        "picojson.h")
 
     get_property(_pugixml_source_dir GLOBAL PROPERTY pugixml_SOURCE_DIR)
-    muse_install_license_notice(pugixml "${_pugixml_source_dir}/pugixml" "LICENSE.md")
+    muse_install_license_notice(pugixml "${_pugixml_source_dir}/pugixml"
+        "LICENSE.md")
+    muse_install_license_notice(pugixml "${_pugixml_source_dir}/pugixml/src"
+        "pugixml.hpp")
 
     get_property(_utfcpp_source_dir GLOBAL PROPERTY utfcpp_SOURCE_DIR)
     muse_install_license_notice(utf8cpp "${_utfcpp_source_dir}/utfcpp" "LICENSE")
-
     if (MUSE_MODULE_AUDIO_EXPORT)
         get_property(_ogg_source_dir GLOBAL PROPERTY ogg_SOURCE_DIR)
         if (_ogg_source_dir)
@@ -101,12 +105,16 @@ if (MUSE_APP_INSTALL_RESOURCES_LOCATION)
 
         get_property(_flac_source_dir GLOBAL PROPERTY flac_SOURCE_DIR)
         if (_flac_source_dir)
-            muse_install_license_notice(flac "${_flac_source_dir}" "COPYING.Xiph" "COPYING.GPL" "COPYING.LGPL")
+            muse_install_license_notice(flac "${_flac_source_dir}"
+                "COPYING.Xiph"
+                "COPYING.GPL"
+                "COPYING.LGPL"
+                "COPYING.FDL")
         endif()
 
         get_property(_lame_source_dir GLOBAL PROPERTY lame_SOURCE_DIR)
         if (_lame_source_dir)
-            muse_install_license_notice(lame "${_lame_source_dir}" "COPYING")
+            muse_install_license_notice(lame "${_lame_source_dir}" "COPYING" "LICENSE")
         endif()
 
         get_property(_opus_source_dir GLOBAL PROPERTY opus_SOURCE_DIR)

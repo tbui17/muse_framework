@@ -6,11 +6,12 @@
 #
 # Copyright (C) 2026 MuseScore Limited
 #
-# Configure/install fixtures for the Qt notice installer. Run from the framework root:
+# Configure/install fixtures for the notice installer and dependency source ownership. Run from
+# the framework root:
 #
 #   cmake -P buildscripts/cmake/deps/tests/run-license-tests.cmake
 #
-# The positive fixture models SPIRV-Cross metadata that names only COPYRIGHT.txt. The
+# The positive Qt fixture models SPIRV-Cross metadata that names only COPYRIGHT.txt. The
 # required LICENSE is not attribution metadata, so the fixture catches validation-only
 # required entries by asserting that the required file still reaches the install tree.
 
@@ -181,4 +182,122 @@ if (_utfcpp_source_index EQUAL -1 OR NOT _utfcpp_stale_index EQUAL -1)
 endif()
 message(STATUS "PASS utf8cpp target, installed notice, and source index use fetched payload")
 
-message(STATUS "All 3 Qt notice fixture tests passed")
+
+# Exercise the full SetupDependencies install shape with source roots that mirror the
+# reviewed payload layouts. This catches a dependency call site that validates a source
+# file but forgets to install it into the package contract.
+set(_full_case "${_work}/setupdependencies-full-shape")
+set(_full_recipe_dir "${_full_case}/recipes")
+set(_full_payload_dir "${_full_case}/payload")
+set(_full_source "${_full_case}/source")
+set(_full_build "${_full_case}/build")
+set(_full_prefix "${_full_case}/install")
+file(MAKE_DIRECTORY "${_full_recipe_dir}" "${_full_source}")
+
+function(_write_full_recipe name source_dir)
+    file(WRITE "${_full_recipe_dir}/${name}.cmake"
+        "function(${name}_Populate local_path)\n"
+        "    set_property(GLOBAL PROPERTY ${name}_SOURCE_DIR \"${source_dir}\")\n"
+        "endfunction()\n")
+endfunction()
+
+set(_full_picojson_source "${_full_payload_dir}/picojson")
+file(MAKE_DIRECTORY "${_full_picojson_source}")
+file(WRITE "${_full_picojson_source}/LICENSE" "picojson license\n")
+file(WRITE "${_full_picojson_source}/picojson.h" "#pragma once\n")
+_write_full_recipe("picojson" "${_full_payload_dir}")
+
+set(_full_pugixml_source "${_full_payload_dir}/pugixml")
+file(MAKE_DIRECTORY "${_full_pugixml_source}/src")
+file(WRITE "${_full_pugixml_source}/LICENSE.md" "pugixml license\n")
+file(WRITE "${_full_pugixml_source}/src/pugixml.hpp" "#pragma once\n")
+_write_full_recipe("pugixml" "${_full_payload_dir}")
+
+set(_full_utfcpp_source "${_full_payload_dir}/utfcpp")
+file(MAKE_DIRECTORY "${_full_utfcpp_source}/source")
+file(WRITE "${_full_utfcpp_source}/LICENSE" "utfcpp license\n")
+file(WRITE "${_full_utfcpp_source}/source/utf8.h" "#pragma once\n")
+_write_full_recipe("utfcpp" "${_full_payload_dir}")
+
+set(_full_ogg_source "${_full_payload_dir}/libogg-1.3.5")
+file(MAKE_DIRECTORY "${_full_ogg_source}")
+file(WRITE "${_full_ogg_source}/COPYING" "ogg license\n")
+_write_full_recipe("ogg" "${_full_ogg_source}")
+
+set(_full_flac_source "${_full_payload_dir}/flac-1.4.3")
+file(MAKE_DIRECTORY "${_full_flac_source}")
+file(WRITE "${_full_flac_source}/COPYING.Xiph" "flac xiph license\n")
+file(WRITE "${_full_flac_source}/COPYING.GPL" "flac gpl license\n")
+file(WRITE "${_full_flac_source}/COPYING.LGPL" "flac lgpl license\n")
+file(WRITE "${_full_flac_source}/COPYING.FDL" "flac fdl license\n")
+_write_full_recipe("flac" "${_full_flac_source}")
+
+set(_full_lame_source "${_full_payload_dir}/lame-3.100")
+file(MAKE_DIRECTORY "${_full_lame_source}")
+file(WRITE "${_full_lame_source}/COPYING" "lame copying\n")
+file(WRITE "${_full_lame_source}/LICENSE" "lame license\n")
+_write_full_recipe("lame" "${_full_lame_source}")
+
+set(_full_opus_source "${_full_payload_dir}/opus-1.5.2")
+file(MAKE_DIRECTORY "${_full_opus_source}")
+file(WRITE "${_full_opus_source}/COPYING" "opus license\n")
+_write_full_recipe("opus" "${_full_opus_source}")
+
+set(_full_opusenc_source "${_full_payload_dir}/libopusenc-0.2.1")
+file(MAKE_DIRECTORY "${_full_opusenc_source}")
+file(WRITE "${_full_opusenc_source}/COPYING" "opusenc license\n")
+_write_full_recipe("opusenc" "${_full_opusenc_source}")
+
+set(_full_fdk_source "${_full_payload_dir}/fdk-aac-2.0.3")
+file(MAKE_DIRECTORY "${_full_fdk_source}")
+file(WRITE "${_full_fdk_source}/NOTICE" "fdk-aac notice\n")
+_write_full_recipe("fdk-aac" "${_full_fdk_source}")
+
+file(WRITE "${_full_source}/CMakeLists.txt"
+    "cmake_minimum_required(VERSION 3.22)\n"
+    "project(setupdependencies_full_shape NONE)\n"
+    "list(APPEND CMAKE_MODULE_PATH \"${_tests_dir}/../..\")\n"
+    "set(MUSE_DEPS_RECIPE_DIR \"${_full_recipe_dir}\")\n"
+    "set(MUSE_APP_INSTALL_RESOURCES_LOCATION \"${_full_prefix}\")\n"
+    "set(MUSE_MODULE_AUDIO_EXPORT ON)\n"
+    "set(MUSE_MODULE_DRAW OFF)\n"
+    "set(MUSE_USE_SYSTEM_FLAC OFF)\n"
+    "set(MUSE_USE_SYSTEM_OPUS OFF)\n"
+    "set(MUSE_USE_SYSTEM_OPUSENC OFF)\n"
+    "set(MUSE_USE_SYSTEM_LAME OFF)\n"
+    "include(\"${_tests_dir}/../../MuseDeps.cmake\")\n"
+    "include(\"${_tests_dir}/../../SetupDependencies.cmake\")\n")
+execute_process(
+    COMMAND "${CMAKE_COMMAND}" -S "${_full_source}" -B "${_full_build}"
+        "-DCMAKE_INSTALL_PREFIX=${_full_prefix}"
+    RESULT_VARIABLE _full_configure_status
+    OUTPUT_VARIABLE _full_configure_output
+    ERROR_VARIABLE _full_configure_error)
+if (NOT _full_configure_status EQUAL 0)
+    message(FATAL_ERROR
+        "Full SetupDependencies license fixture failed to configure (status ${_full_configure_status}):\n"
+        "${_full_configure_output}\n${_full_configure_error}")
+endif()
+execute_process(
+    COMMAND "${CMAKE_COMMAND}" --install "${_full_build}"
+    RESULT_VARIABLE _full_install_status
+    OUTPUT_VARIABLE _full_install_output
+    ERROR_VARIABLE _full_install_error)
+if (NOT _full_install_status EQUAL 0)
+    message(FATAL_ERROR
+        "Full SetupDependencies license fixture failed to install (status ${_full_install_status}):\n"
+        "${_full_install_output}\n${_full_install_error}")
+endif()
+foreach(_required IN ITEMS
+    "licenses/lame/LICENSE"
+    "licenses/flac/COPYING.FDL"
+    "licenses/pugixml/pugixml.hpp"
+    "licenses/picojson/picojson.h")
+    if (NOT EXISTS "${_full_prefix}/${_required}")
+        message(FATAL_ERROR
+            "Full SetupDependencies license fixture did not install ${_required}")
+    endif()
+endforeach()
+message(STATUS "PASS full SetupDependencies license install shape")
+
+message(STATUS "All 4 license fixture tests passed")
