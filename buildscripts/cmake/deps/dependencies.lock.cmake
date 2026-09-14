@@ -23,10 +23,11 @@
 #
 # Expected entry format: "<destination-relative path>" that must exist after fetching.
 #
-# Every hash below was verified on 2026-09-13 by downloading the payload from the URL
-# recorded next to it and hashing the bytes, and each one matches the corresponding pin in
-# the upstream recipes at musescore/muse_deps daedf3e1b761a1af80335f1a2dbf88cf581f7c62
-# (recipes/<name>/spec.cmake). Expected layouts were verified against the same downloads.
+# Existing pins were verified on 2026-09-13 by downloading each payload from the URL recorded
+# next to it and hashing the bytes. The audio and draw pins added in this migration were verified
+# the same way on 2026-09-14. Each pin matches the corresponding recipe in the upstream
+# musescore/muse_deps revision daedf3e1b761a1af8035f1a2dbf88cf581f7c62
+# (recipes/<name>/spec.cmake); expected layouts were verified against those downloads.
 # A changed upstream payload therefore fails the build instead of entering it silently.
 
 # --- musescore_prebuild_win_deps (Windows prebuilt zlib + libsndfile) --------------
@@ -53,6 +54,62 @@ set(MUSE_DEP_fdk-aac_EXPECTED
     "fdk-aac-2.0.3/fdk-aac.pc.in"
 )
 
+# --- Ogg 1.3.5 (MUSE_MODULE_AUDIO_EXPORT) -------------------------------------------
+set(MUSE_DEP_ogg_VERSION "1.3.5")
+set(MUSE_DEP_ogg_PAYLOADS
+    "single-root|libogg-1.3.5|https://github.com/xiph/ogg/releases/download/v1.3.5/libogg-1.3.5.tar.gz|0eb4b4b9420a0f51db142ba3f9c64b333f826532dc0f48c6410ae51f4799b664"
+)
+set(MUSE_DEP_ogg_EXPECTED
+    "libogg-1.3.5/COPYING"
+    "libogg-1.3.5/CMakeLists.txt"
+    "libogg-1.3.5/include/ogg/ogg.h"
+)
+# --- FLAC 1.4.3 (MUSE_MODULE_AUDIO_EXPORT) ------------------------------------------
+set(MUSE_DEP_flac_VERSION "1.4.3")
+set(MUSE_DEP_flac_PAYLOADS
+    "single-root|flac-1.4.3|https://github.com/xiph/flac/releases/download/1.4.3/flac-1.4.3.tar.xz|6c58e69cd22348f441b861092b825e591d0b822e106de6eb0ee4d05d27205b70"
+)
+set(MUSE_DEP_flac_EXPECTED
+    "flac-1.4.3/COPYING.Xiph"
+    "flac-1.4.3/COPYING.GPL"
+    "flac-1.4.3/COPYING.LGPL"
+    "flac-1.4.3/CMakeLists.txt"
+    "flac-1.4.3/include/FLAC/all.h"
+)
+
+# --- LAME 3.100 (MUSE_MODULE_AUDIO_EXPORT) -------------------------------------------
+set(MUSE_DEP_lame_VERSION "3.100")
+set(MUSE_DEP_lame_PAYLOADS
+    "single-root|lame-3.100|https://downloads.sourceforge.net/project/lame/lame/3.100/lame-3.100.tar.gz|ddfe36cab873794038ae2c1210557ad34857a4b6bdc515785d1da9e175b1da1e"
+)
+set(MUSE_DEP_lame_EXPECTED
+    "lame-3.100/COPYING"
+    "lame-3.100/include/lame.h"
+    "lame-3.100/libmp3lame/bitstream.c"
+)
+
+# --- Opus 1.5.2 (MUSE_MODULE_AUDIO_EXPORT) -------------------------------------------
+set(MUSE_DEP_opus_VERSION "1.5.2")
+set(MUSE_DEP_opus_PAYLOADS
+    "single-root|opus-1.5.2|https://github.com/xiph/opus/releases/download/v1.5.2/opus-1.5.2.tar.gz|65c1d2f78b9f2fb20082c38cbe47c951ad5839345876e46941612ee87f9a7ce1"
+)
+set(MUSE_DEP_opus_EXPECTED
+    "opus-1.5.2/CMakeLists.txt"
+    "opus-1.5.2/COPYING"
+    "opus-1.5.2/include/opus.h"
+)
+
+# --- libopusenc 0.2.1 (MUSE_MODULE_AUDIO_EXPORT) ------------------------------------
+set(MUSE_DEP_opusenc_VERSION "0.2.1")
+set(MUSE_DEP_opusenc_PAYLOADS
+    "single-root|libopusenc-0.2.1|https://github.com/xiph/libopusenc/archive/v0.2.1.tar.gz|56952a926ff962c62a468b43cc8506c069bda767cade4dc92824b74edd570d68"
+)
+set(MUSE_DEP_opusenc_EXPECTED
+    "libopusenc-0.2.1/COPYING"
+    "libopusenc-0.2.1/include/opusenc.h"
+    "libopusenc-0.2.1/src/opusenc.c"
+)
+
 # --- ASIO SDK 2.3.4 / 2025-10-15 (MUSE_MODULE_AUDIO_ASIO, Windows) ------------------
 # The ASIO SDK is distributed as a zip inside muse_deps; the commit below is the
 # immutable revision that shipped this exact archive (sha256 verified).
@@ -76,6 +133,20 @@ set(MUSE_DEP_harfbuzz_EXPECTED
     "harfbuzz/CMakeLists.txt"
     "harfbuzz/src/harfbuzz.cc"
     "harfbuzz/src/hb-ft.h"
+)
+
+# --- FreeType 2.14.1 (MUSE_MODULE_DRAW) ---------------------------------------------
+set(MUSE_DEP_freetype_VERSION "2.14.1")
+set(MUSE_DEP_freetype_PAYLOADS
+    "single-root|freetype-2.14.1|https://download.savannah.gnu.org/releases/freetype/freetype-2.14.1.tar.xz|32427e8c471ac095853212a37aef816c60b42052d4d9e48230bab3bdf2936ccc"
+)
+set(MUSE_DEP_freetype_EXPECTED
+    "freetype-2.14.1/CMakeLists.txt"
+    "freetype-2.14.1/LICENSE.TXT"
+    "freetype-2.14.1/docs/FTL.TXT"
+    "freetype-2.14.1/docs/GPLv2.TXT"
+    "freetype-2.14.1/include/freetype/freetype.h"
+    "freetype-2.14.1/include/ft2build.h"
 )
 
 # --- KDDockWidgets 2.4 (MUSE_MODULE_DOCKWINDOW_KDDOCKWIDGETS_V2) -------------------

@@ -28,6 +28,57 @@ populate(picojson)
 populate(pugixml)
 populate(utfcpp)
 
+if (MUSE_MODULE_AUDIO_EXPORT)
+    # These targets mirror current-main MuseDeps metadata. Keep dependency order explicit because
+    # FLAC and libopusenc consume the canonical Ogg target, while libopusenc also consumes Opus.
+    if (NOT MUSE_USE_SYSTEM_FLAC OR NOT MUSE_USE_SYSTEM_OPUSENC)
+        populate(ogg)
+    endif()
+
+    if (MUSE_USE_SYSTEM_OPUS)
+        find_package(Opus QUIET)
+        if (OPUS_FOUND)
+            if (TARGET opus AND NOT TARGET Opus::opus)
+                add_library(Opus::opus ALIAS opus)
+            endif()
+        endif()
+        if (NOT TARGET Opus::opus)
+            find_package(PkgConfig QUIET)
+            if (PkgConfig_FOUND)
+                pkg_check_modules(opus QUIET IMPORTED_TARGET opus)
+                if (TARGET PkgConfig::opus)
+                    add_library(Opus::opus ALIAS PkgConfig::opus)
+                endif()
+            endif()
+        endif()
+        if (NOT TARGET Opus::opus)
+            message(WARNING "Set MUSE_USE_SYSTEM_OPUS=ON, but system opus was not usable; the pinned source will be used")
+            populate(opus)
+        endif()
+    elseif (NOT MUSE_USE_SYSTEM_OPUSENC)
+        populate(opus)
+    endif()
+
+    if (NOT MUSE_USE_SYSTEM_FLAC)
+        populate(flac)
+    endif()
+    if (NOT MUSE_USE_SYSTEM_LAME)
+        populate(lame)
+    endif()
+    if (NOT MUSE_USE_SYSTEM_OPUSENC)
+        populate(opusenc)
+    endif()
+endif()
+
+if (MUSE_MODULE_AUDIO_EXPORT)
+    populate(fdk-aac)
+endif()
+
+if (MUSE_MODULE_DRAW)
+    include("${CMAKE_CURRENT_LIST_DIR}/../../framework/draw/cmake/SetupFreeType.cmake")
+    include("${CMAKE_CURRENT_LIST_DIR}/../../framework/draw/cmake/SetupHarfBuzz.cmake")
+endif()
+
 if (MUSE_APP_INSTALL_RESOURCES_LOCATION)
     get_property(_picojson_source_dir GLOBAL PROPERTY picojson_SOURCE_DIR)
     muse_install_license_notice(picojson "${_picojson_source_dir}/picojson" "LICENSE")
@@ -37,6 +88,36 @@ if (MUSE_APP_INSTALL_RESOURCES_LOCATION)
 
     get_property(_utfcpp_source_dir GLOBAL PROPERTY utfcpp_SOURCE_DIR)
     muse_install_license_notice(utf8cpp "${_utfcpp_source_dir}/utfcpp" "LICENSE")
+
+    if (MUSE_MODULE_AUDIO_EXPORT)
+        get_property(_ogg_source_dir GLOBAL PROPERTY ogg_SOURCE_DIR)
+        if (_ogg_source_dir)
+            muse_install_license_notice(ogg "${_ogg_source_dir}" "COPYING")
+        endif()
+
+        get_property(_flac_source_dir GLOBAL PROPERTY flac_SOURCE_DIR)
+        if (_flac_source_dir)
+            muse_install_license_notice(flac "${_flac_source_dir}" "COPYING.Xiph" "COPYING.GPL" "COPYING.LGPL")
+        endif()
+
+        get_property(_lame_source_dir GLOBAL PROPERTY lame_SOURCE_DIR)
+        if (_lame_source_dir)
+            muse_install_license_notice(lame "${_lame_source_dir}" "COPYING")
+        endif()
+
+        get_property(_opus_source_dir GLOBAL PROPERTY opus_SOURCE_DIR)
+        if (_opus_source_dir)
+            muse_install_license_notice(opus "${_opus_source_dir}" "COPYING")
+        endif()
+
+        get_property(_opusenc_source_dir GLOBAL PROPERTY opusenc_SOURCE_DIR)
+        if (_opusenc_source_dir)
+            muse_install_license_notice(libopusenc "${_opusenc_source_dir}" "COPYING")
+        endif()
+
+        get_property(_fdk_aac_source_dir GLOBAL PROPERTY fdk-aac_SOURCE_DIR)
+        muse_install_license_notice(fdk-aac "${_fdk_aac_source_dir}" "NOTICE")
+    endif()
 endif()
 
 
@@ -62,27 +143,20 @@ if (MUSE_MODULE_DOCKWINDOW_KDDOCKWIDGETS_V2)
     endif()
 endif()
 
-if (MUSE_MODULE_AUDIO_EXPORT)
-    populate(fdk-aac)
-
-    if (MUSE_APP_INSTALL_RESOURCES_LOCATION)
-        # The FDK AAC license text is NOTICE; MODULE_LICENSE_FRAUNHOFER in the same payload is
-        # an empty marker file, so only the real text is installed.
-        get_property(fdk_aac_src_dir GLOBAL PROPERTY fdk-aac_SOURCE_DIR)
-        muse_install_license_notice(fdk-aac "${fdk_aac_src_dir}" "NOTICE")
-    endif()
-endif()
 
 if (MUSE_APP_INSTALL_RESOURCES_LOCATION)
     # Source references for the components whose notices are installed above and in the module
     # CMakeLists (see every muse_install_license_notice call site).
     muse_install_source_index(
-        "framework/draw/thirdparty/freetype/freetype-2.14.1|freetype 2.14.1, in-tree"
+        "freetype/freetype-2.14.1|freetype 2.14.1, pinned source payload"
+        "harfbuzz/harfbuzz|HarfBuzz 12.3.0, pinned source payload"
         "framework/audio/thirdparty/fluidsynth/fluidsynth-2.3.3|FluidSynth 2.3.3, in-tree"
-        "framework/audio/thirdparty/lame|lame, in-tree"
-        "framework/audio/thirdparty/flac/flac-1.4.3|FLAC 1.4.3, in-tree"
-        "framework/audio/thirdparty/opus/opus-1.5.2|Opus 1.5.2, in-tree"
-        "framework/audio/thirdparty/opusenc/libopusenc-0.2.1|libopusenc 0.2.1, in-tree"
+        "ogg/libogg-1.3.5|Ogg 1.3.5, pinned source payload"
+        "lame/lame-3.100|LAME 3.100, pinned source payload"
+        "flac/flac-1.4.3|FLAC 1.4.3, pinned source payload"
+        "opus/opus-1.5.2|Opus 1.5.2, pinned source payload"
+        "opusenc/libopusenc-0.2.1|libopusenc 0.2.1, pinned source payload"
+        "fdk-aac/fdk-aac-2.0.3|fdk-aac 2.0.3, pinned source payload"
         "framework/audio/thirdparty/stb/stb_vorbis.c|stb_vorbis v1.22, in-tree"
         "framework/global/thirdparty/kors_*|kors modules, in-tree"
         "picojson|picojson 111c9be, pinned source payload"

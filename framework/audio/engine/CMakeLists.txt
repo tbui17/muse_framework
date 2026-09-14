@@ -241,30 +241,30 @@ if (MUSE_MODULE_AUDIO_EXPORT)
         target_link_libraries(muse_audio_engine PRIVATE "${LAME_LIBRARY}")
         target_compile_definitions(muse_audio_engine PRIVATE SYSTEM_LAME)
     else()
-        add_subdirectory(../thirdparty/lame lame EXCLUDE_FROM_ALL)
-        target_link_libraries(muse_audio_engine PRIVATE lame)
+        if (NOT TARGET libmp3lame::libmp3lame)
+            message(FATAL_ERROR "[lame] the canonical libmp3lame::libmp3lame target is unavailable")
+        endif()
+        target_link_libraries(muse_audio_engine PRIVATE libmp3lame::libmp3lame)
     endif()
 
     include(../cmake/SetupOpusEnc.cmake)
+    if (MUSE_OPUSENC_SYSTEM)
+        target_compile_definitions(muse_audio_engine PRIVATE SYSTEM_OPUSENC)
+    endif()
     target_link_libraries(muse_audio_engine PRIVATE ${LIBOPUSENC_TARGETS})
 
     include(../cmake/SetupFlac.cmake)
     target_link_libraries(muse_audio_engine PRIVATE ${FLAC_TARGETS})
 
-    if (MUSE_APP_INSTALL_RESOURCES_LOCATION)
-        # Vendored encoders linked statically into the export path.
-        include(SetupLicenseNotices)
-        muse_install_license_notice(lame "${CMAKE_CURRENT_LIST_DIR}/../thirdparty/lame" "LICENSE" "COPYING")
-        muse_install_license_notice(flac "${CMAKE_CURRENT_LIST_DIR}/../thirdparty/flac/flac-1.4.3"
-            "COPYING.Xiph" "COPYING.LGPL" "COPYING.GPL" "COPYING.FDL")
-        muse_install_license_notice(opus "${CMAKE_CURRENT_LIST_DIR}/../thirdparty/opus/opus-1.5.2" "COPYING")
-        muse_install_license_notice(libopusenc
-            "${CMAKE_CURRENT_LIST_DIR}/../thirdparty/opusenc/libopusenc-0.2.1" "COPYING")
+    if (NOT TARGET fdk-aac::fdk-aac)
+        message(FATAL_ERROR "[fdk-aac] the canonical fdk-aac::fdk-aac target is unavailable")
     endif()
-
-    target_link_libraries(muse_audio_engine PRIVATE fdk-aac)
+    target_link_libraries(muse_audio_engine PRIVATE fdk-aac::fdk-aac)
 
     get_property(fdk_aac_src_dir GLOBAL PROPERTY fdk-aac_SOURCE_DIR)
+    if (NOT fdk_aac_src_dir)
+        message(FATAL_ERROR "[fdk-aac] source directory property is unavailable")
+    endif()
     target_include_directories(muse_audio_engine SYSTEM PRIVATE
         ${fdk_aac_src_dir}
         ${fdk_aac_src_dir}/libAACdec/include

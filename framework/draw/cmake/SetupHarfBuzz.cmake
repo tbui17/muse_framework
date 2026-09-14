@@ -24,10 +24,16 @@ if (MUSE_USE_SYSTEM_HARFBUZZ)
     if (HarfBuzz_FOUND)
         message(STATUS "Found HarfBuzz")
 
-        # See HarfBuzz's harfbuzz-config.cmake, which is quite minimalistic
-        set(HARFBUZZ_LIBRARIES harfbuzz::harfbuzz)
+        # See HarfBuzz's harfbuzz-config.cmake, which is quite minimalistic.
+        if (TARGET harfbuzz::harfbuzz)
+            set(HARFBUZZ_LIBRARIES harfbuzz::harfbuzz)
+        elseif (TARGET harfbuzz)
+            add_library(harfbuzz::harfbuzz ALIAS harfbuzz)
+            set(HARFBUZZ_LIBRARIES harfbuzz::harfbuzz)
+        else()
+            message(FATAL_ERROR "[harfbuzz] system package did not provide harfbuzz::harfbuzz")
+        endif()
         set(HARFBUZZ_INCLUDE_DIRS ${HARFBUZZ_INCLUDE_DIR})
-
         return()
     else()
         message(WARNING "Set MUSE_USE_SYSTEM_HARFBUZZ=ON, but system harfbuzz not found, built-in will be used")
@@ -47,6 +53,7 @@ muse_dependency_output_dir(harfbuzz harfbuzz_output_dir)
 muse_dependency_populate(harfbuzz "${harfbuzz_output_dir}")
 
 set(HARFBUZZ_SOURCE_DIR "${harfbuzz_output_dir}/harfbuzz")
+set_property(GLOBAL PROPERTY harfbuzz_SOURCE_DIR "${HARFBUZZ_SOURCE_DIR}")
 set(HB_HAVE_FREETYPE ON)
 
 if (MUSE_APP_INSTALL_RESOURCES_LOCATION)
@@ -68,5 +75,5 @@ target_no_warning(harfbuzz -WMSVC-no-unreachable)
 
 #add_subdirectory(thirdparty/msdfgen)
 
-set(HARFBUZZ_LIBRARIES harfbuzz)
+set(HARFBUZZ_LIBRARIES harfbuzz::harfbuzz)
 set(HARFBUZZ_INCLUDE_DIRS ${HARFBUZZ_SOURCE_DIR}/src)

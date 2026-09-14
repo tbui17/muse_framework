@@ -21,22 +21,34 @@
 if (MUSE_USE_SYSTEM_FREETYPE)
     find_package(Freetype)
 
-    if (FREETYPE_FOUND)
+    if (FREETYPE_FOUND AND TARGET Freetype::Freetype)
         message(STATUS "Found freetype: ${FREETYPE_VERSION_STRING}")
+        if (NOT TARGET freetype::freetype)
+            add_library(freetype::freetype ALIAS Freetype::Freetype)
+        endif()
+        set(FREETYPE_LIBRARIES freetype::freetype)
+        return()
     else()
-        message(WARNING "Set MUSE_USE_SYSTEM_FREETYPE=ON, but system freetype not found, built-in will be used")
+        message(WARNING "Set MUSE_USE_SYSTEM_FREETYPE=ON, but system freetype was not usable; built-in will be used")
     endif()
 endif()
 
-if (NOT FREETYPE_FOUND)
-    # sets FREETYPE_LIBRARIES and FREETYPE_INCLUDE_DIRS
-    add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/../thirdparty/freetype freetype)
+# The reviewed recipe pins the source archive and exposes the same lowercase target expected by
+# current-main MuseDeps consumers. Its payload is materialised under the build tree.
+include(MuseDeps)
+populate(freetype)
+get_property(_freetype_source_dir GLOBAL PROPERTY freetype_SOURCE_DIR)
+if (NOT _freetype_source_dir OR NOT TARGET freetype::freetype)
+    message(FATAL_ERROR "[freetype] the canonical freetype::freetype target or source directory is unavailable")
+endif()
+set(FREETYPE_LIBRARIES freetype::freetype)
+set(FREETYPE_INCLUDE_DIRS "${_freetype_source_dir}/include")
 
-    if (MUSE_APP_INSTALL_RESOURCES_LOCATION)
-        # FreeType is offered under the FreeType License or GPL-2.0; both texts ship with it.
-        include(SetupLicenseNotices)
-        muse_install_license_notice(freetype
-            "${CMAKE_CURRENT_LIST_DIR}/../thirdparty/freetype/freetype-2.14.1"
-            "LICENSE.TXT" "docs/FTL.TXT" "docs/GPLv2.TXT")
-    endif()
+if (MUSE_APP_INSTALL_RESOURCES_LOCATION)
+    # FreeType is offered under the FreeType License or GPL-2.0; ship all legal texts from the
+    # exact payload that produced freetype::freetype.
+    include(SetupLicenseNotices)
+    muse_install_license_notice(freetype
+        "${_freetype_source_dir}"
+        "LICENSE.TXT" "docs/FTL.TXT" "docs/GPLv2.TXT")
 endif()

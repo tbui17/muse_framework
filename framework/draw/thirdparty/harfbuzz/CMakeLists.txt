@@ -25,7 +25,7 @@
 # and is located by HARFBUZZ_SOURCE_DIR, which framework/draw/cmake/SetupHarfBuzz.cmake
 # sets before adding this directory. Only the amalgamated source is compiled.
 
-muse_create_thirdparty_module(harfbuzz)
+muse_create_thirdparty_module(harfbuzz ALIAS harfbuzz::harfbuzz)
 
 if (NOT HARFBUZZ_SOURCE_DIR)
     message(FATAL_ERROR "[harfbuzz] HARFBUZZ_SOURCE_DIR must point at the pinned HarfBuzz source tree")

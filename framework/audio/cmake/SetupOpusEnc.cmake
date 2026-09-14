@@ -17,17 +17,38 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
+set(MUSE_OPUSENC_SYSTEM OFF)
 
 if (MUSE_USE_SYSTEM_OPUSENC)
-    find_package(PkgConfig REQUIRED)
+    if (PkgConfig_FOUND)
+        pkg_check_modules(libopusenc QUIET IMPORTED_TARGET libopusenc)
+        pkg_check_modules(opus QUIET IMPORTED_TARGET opus)
 
-    pkg_check_modules(libopusenc REQUIRED IMPORTED_TARGET libopusenc)
+        if (TARGET PkgConfig::libopusenc AND TARGET PkgConfig::opus)
+            if (NOT TARGET Opus::opus)
+                add_library(Opus::opus ALIAS PkgConfig::opus)
+            endif()
+            message(STATUS "Found opusenc through pkg-config")
+            set(LIBOPUSENC_TARGETS PkgConfig::libopusenc PkgConfig::opus)
+            set(MUSE_OPUSENC_SYSTEM ON)
+            return()
+        endif()
+    endif()
 
-    # Transitive dependency
-    pkg_check_modules(opus REQUIRED IMPORTED_TARGET opus)
-
-    set(LIBOPUSENC_TARGETS PkgConfig::libopusenc PkgConfig::opus)
-else()
-    add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/../thirdparty/opusenc opusenc EXCLUDE_FROM_ALL)
-    set(LIBOPUSENC_TARGETS opusenc)
+    message(WARNING "Set MUSE_USE_SYSTEM_OPUSENC=ON, but system opusenc was not usable; the pinned source will be used")
 endif()
+
+if (NOT TARGET Ogg::ogg)
+    populate(ogg)
+endif()
+if (NOT TARGET Opus::opus)
+    populate(opus)
+endif()
+if (NOT TARGET opusenc::opusenc)
+    populate(opusenc)
+endif()
+
+if (NOT TARGET opusenc::opusenc)
+    message(FATAL_ERROR "[opusenc] the canonical opusenc::opusenc target is unavailable")
+endif()
+set(LIBOPUSENC_TARGETS opusenc::opusenc)

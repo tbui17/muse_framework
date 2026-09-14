@@ -20,5 +20,11 @@ function(fdk-aac_Populate local_path)
 
     add_subdirectory("${src_path}" "${CMAKE_BINARY_DIR}/fdk-aac" EXCLUDE_FROM_ALL)
 
+    if (TARGET fdk-aac AND NOT TARGET fdk-aac::fdk-aac)
+        add_library(fdk-aac::fdk-aac ALIAS fdk-aac)
+    endif()
+    if (NOT TARGET fdk-aac::fdk-aac)
+        message(FATAL_ERROR "[fdk-aac] upstream source did not provide fdk-aac::fdk-aac")
+    endif()
     set_property(GLOBAL PROPERTY fdk-aac_SOURCE_DIR "${src_path}")
 endfunction()
