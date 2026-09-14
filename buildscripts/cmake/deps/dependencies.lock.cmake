@@ -138,7 +138,7 @@ set(MUSE_DEP_harfbuzz_EXPECTED
 # --- FreeType 2.14.1 (MUSE_MODULE_DRAW) ---------------------------------------------
 set(MUSE_DEP_freetype_VERSION "2.14.1")
 set(MUSE_DEP_freetype_PAYLOADS
-    "single-root|freetype-2.14.1|https://download.savannah.gnu.org/releases/freetype/freetype-2.14.1.tar.xz|32427e8c471ac095853212a37aef816c60b42052d4d9e48230bab3bdf2936ccc"
+    "single-root|freetype-2.14.1|https://downloads.sourceforge.net/project/freetype/freetype2/2.14.1/freetype-2.14.1.tar.xz|32427e8c471ac095853212a37aef816c60b42052d4d9e48230bab3bdf2936ccc"
 )
 set(MUSE_DEP_freetype_EXPECTED
     "freetype-2.14.1/CMakeLists.txt"
