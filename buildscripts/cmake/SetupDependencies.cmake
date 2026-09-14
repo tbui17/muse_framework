@@ -27,6 +27,10 @@ endif()
 populate(picojson)
 populate(pugixml)
 populate(utfcpp)
+if (MUSE_ENABLE_UNIT_TESTS)
+    # Keep the test-only dependency out of production configure and package closures.
+    populate(googletest)
+endif()
 
 if (MUSE_MODULE_AUDIO_EXPORT)
     # These targets mirror current-main MuseDeps metadata. Keep dependency order explicit because

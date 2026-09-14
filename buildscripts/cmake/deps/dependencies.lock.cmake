@@ -187,6 +187,19 @@ set(MUSE_DEP_vst3sdk_EXPECTED
 # These pins mirror the current MuseDeps source recipes. Their checked-in recipes
 # expose the same target and source-directory contracts without executing remote
 # CMake at configure time.
+# --- GoogleTest 1.17.0 (MUSE_ENABLE_UNIT_TESTS) -------------------------------------
+# The archive and layout match recipes/googletest/spec.cmake at the reviewed
+# musescore/muse_deps revision recorded above.
+set(MUSE_DEP_googletest_VERSION "1.17.0")
+set(MUSE_DEP_googletest_PAYLOADS
+    "single-root|googletest|https://github.com/google/googletest/archive/refs/tags/v1.17.0.tar.gz|65fab701d9829d38cb77c14acdc431d2108bfdbf8979e40eb8ae567edf10b27c"
+)
+set(MUSE_DEP_googletest_EXPECTED
+    "googletest/LICENSE"
+    "googletest/CMakeLists.txt"
+    "googletest/googletest/CMakeLists.txt"
+)
+
 set(MUSE_DEP_picojson_VERSION "111c9be")
 set(MUSE_DEP_picojson_PAYLOADS
     "single-root|picojson|https://github.com/kazuho/picojson/archive/111c9be5188f7350c2eac9ddaedd8cca3d7bf394.tar.gz|671f89832a17e9e71398f80c0a326afa2ebe81f4c26d5a9992e1fcd0888ae151"
