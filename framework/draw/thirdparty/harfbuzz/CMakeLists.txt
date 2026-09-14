@@ -35,10 +35,14 @@ target_sources(harfbuzz PRIVATE
     ${HARFBUZZ_SOURCE_DIR}/src/harfbuzz.cc
 )
 
-target_include_directories(harfbuzz PRIVATE
+target_include_directories(harfbuzz PUBLIC
+    ${HARFBUZZ_SOURCE_DIR}/src
     ${FREETYPE_INCLUDE_DIRS}
 )
 
+target_link_libraries(harfbuzz PUBLIC
+    freetype::freetype
+)
 target_compile_definitions(harfbuzz PRIVATE HAVE_FREETYPE)
 
 target_no_warning(harfbuzz -Wno-truncate)
