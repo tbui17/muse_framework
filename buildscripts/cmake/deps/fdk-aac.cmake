@@ -18,11 +18,17 @@ function(fdk-aac_Populate local_path)
     set(BUILD_SHARED_LIBS OFF CACHE BOOL "Build shared library" FORCE)
     set(BUILD_PROGRAMS OFF CACHE BOOL "Build extra utilities" FORCE)
 
+    set(_muse_legacy_policy_guard FALSE)
     if (CMAKE_VERSION VERSION_GREATER_EQUAL 4.0)
         set(CMAKE_POLICY_VERSION_MINIMUM 3.5)
+        set(_muse_legacy_policy_guard TRUE)
     endif()
 
     add_subdirectory("${src_path}" "${CMAKE_BINARY_DIR}/fdk-aac" EXCLUDE_FROM_ALL)
+
+    if (_muse_legacy_policy_guard)
+        unset(CMAKE_POLICY_VERSION_MINIMUM)
+    endif()
 
     if (TARGET fdk-aac AND NOT TARGET fdk-aac::fdk-aac)
         add_library(fdk-aac::fdk-aac ALIAS fdk-aac)

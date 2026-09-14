@@ -169,7 +169,7 @@ target_sources(muse_global PRIVATE
     serialization/xmldom.h
 )
 
-target_link_libraries(muse_global PRIVATE pugixml utfcpp)
+target_link_libraries(muse_global PRIVATE picojson pugixml utfcpp)
 
 if (MUSE_THREADS_SUPPORT)
     target_sources(muse_global PRIVATE

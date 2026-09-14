@@ -22,11 +22,17 @@ function(ogg_Populate local_path)
     set(INSTALL_PKG_CONFIG_MODULE OFF CACHE BOOL "Install libogg pkg-config metadata" FORCE)
     set(INSTALL_CMAKE_PACKAGE_MODULE OFF CACHE BOOL "Install libogg CMake package metadata" FORCE)
 
+    set(_muse_legacy_policy_guard FALSE)
     if (CMAKE_VERSION VERSION_GREATER_EQUAL 4.0)
         set(CMAKE_POLICY_VERSION_MINIMUM 3.5)
+        set(_muse_legacy_policy_guard TRUE)
     endif()
 
     add_subdirectory("${src_path}" "${CMAKE_BINARY_DIR}/muse-deps-ogg" EXCLUDE_FROM_ALL)
+
+    if (_muse_legacy_policy_guard)
+        unset(CMAKE_POLICY_VERSION_MINIMUM)
+    endif()
 
     if (NOT TARGET Ogg::ogg)
         message(FATAL_ERROR "[ogg] upstream source did not provide the canonical Ogg::ogg target")

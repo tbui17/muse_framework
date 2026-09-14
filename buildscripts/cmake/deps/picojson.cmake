@@ -45,6 +45,11 @@ function(picojson_Populate local_path)
         file(WRITE "${source_dir}/.muse-picojson-patched" "picojson framework patch applied\n")
     endif()
 
-    # Global includes picojson.h through this source root, matching current MuseDeps.
+    if (NOT TARGET picojson)
+        add_library(picojson INTERFACE IMPORTED GLOBAL)
+        set_target_properties(picojson PROPERTIES
+            INTERFACE_INCLUDE_DIRECTORIES "${source_dir}")
+    endif()
+
     set_property(GLOBAL PROPERTY picojson_SOURCE_DIR "${local_path}")
 endfunction()
