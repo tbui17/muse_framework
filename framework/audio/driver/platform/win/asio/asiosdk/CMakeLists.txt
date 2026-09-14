@@ -1,9 +1,32 @@
 
 muse_create_thirdparty_module(asiosdk)
 
-get_property(_asio_src GLOBAL PROPERTY asiosdk_SOURCE_DIR)
-if (NOT _asio_src)
-    message(FATAL_ERROR "[asiosdk] not populated; ExtDepsManifest.cmake must run before this module")
+if(MUSE_MODULE_AUDIO_ASIO_SDK_PATH)
+    set(ASIO_SDK_PATH ${MUSE_MODULE_AUDIO_ASIO_SDK_PATH})
+else()
+
+    # If not set MUSE_MODULE_AUDIO_ASIO_SDK_PATH use the pinned ASIO SDK.
+    # The reviewed recipe is buildscripts/cmake/deps/asiosdk.cmake; its payload URL and
+    # SHA-256 are pinned in buildscripts/cmake/deps/dependencies.lock.cmake.
+    include(DependencyPayload)
+
+    muse_dependency_output_dir(asiosdk _asio_output_dir)
+    muse_dependency_populate(asiosdk "${_asio_output_dir}")
+
+    set(ASIO_SDK_PATH "${_asio_output_dir}")
+    message(STATUS "ASIO_SDK_PATH: ${ASIO_SDK_PATH}")
+
+    if (MUSE_APP_INSTALL_RESOURCES_LOCATION)
+        # The ASIO SDK is offered under the Steinberg ASIO license or GPL-3.0; the payload
+        # carries the text at its root and next to the common headers, plus the signed
+        # Steinberg ASIO Licensing Agreement.
+        include(SetupLicenseNotices)
+        muse_install_license_notice(asiosdk "${_asio_output_dir}/ASIOSDK"
+            "LICENSE.txt"
+            "common/LICENSE.txt"
+            "Steinberg ASIO Licensing Agreement.pdf"
+        )
+    endif()
 endif()
 set(ASIO_SDK_PATH ${_asio_src}/asiosdk)
 

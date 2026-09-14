@@ -286,30 +286,55 @@ void AccessibilityController::announce(const QString& announcement)
     // want to hear the same announcement multiple times.
     m_announcement = announcement;
 
-    if (!m_lastFocused || announcement.isEmpty()) {
+    if (announcement.isEmpty()) {
         return;
     }
 
+#if defined(Q_OS_WIN)
+    // PROPER SOLUTION: QAccessibleAnnouncementEvent (Qt 6.8+).
+    // On Windows, the NameChanged + triggerRevoicing hack below fails when
+    // m_lastFocused is null or has no usable sibling — NVDA reads the pretend-focus
+    // target instead of the announcement. The dedicated announcement event is
+    // handled by NVDA as a spoken message, independent of focus state.
+    // VoiceOver (macOS) doesn't interrupt prior speech with this event, so it's
+    // gated to Windows only.
+    {
+        // Use a stable object as the announcement source. NVDA treats
+        // QAccessibleAnnouncementEvent as a spoken message independent of focus.
+        QObject* target = nullptr;
+        if (m_lastFocused) {
+            const Item& focused = findItem(m_lastFocused);
+            if (focused.isValid()) {
+                target = focused.object;
+            }
+        }
+        if (!target) {
+            // No focused item — use the app root as the announcement source.
+            auto appRoot = appRootObject();
+            if (appRoot) {
+                target = appRoot->asQObject();
+            }
+        }
+        if (target) {
+            QAccessibleAnnouncementEvent event(target, announcement);
+            event.setPoliteness(QAccessible::AnnouncementPoliteness::Assertive);
+            sendEvent(&event);
+        }
+    }
+    return;
+#endif
+
+    // HACKY SOLUTION (macOS / Linux)
+    // Item returns announcement as its external name in accessibleiteminterface.cpp.
+    // Note: Its *internal* name is not changed because that would notify subscribers
+    // to IAccessible::accessiblePropertyChanged(), which has side effects.
+    if (!m_lastFocused) {
+        return;
+    }
     const Item& focused = findItem(m_lastFocused);
     if (!focused.isValid()) {
         return;
     }
-
-#if 0
-    // PROPER SOLUTION, but it requires Qt 6.8+ and has these problems:
-    // * VoiceOver doesn't interrupt prior speech to say the announcement.
-    // * When there's no selection, NVDA says "blank" before each announcement.
-    // VoiceOver: Use QObject not QAccessibleInterface in QAccessible…Event() constructors.
-    QAccessibleAnnouncementEvent event(focused.object, announcement);
-    event.setPoliteness(QAccessible::AnnouncementPoliteness::Assertive);
-    sendEvent(&event);
-    return;
-#endif
-
-    // HACKY SOLUTION
-    // Item returns announcement as its external name in accessibleiteminterface.cpp.
-    // Note: Its *internal* name is not changed because that would notify subscribers
-    // to IAccessible::accessiblePropertyChanged(), which has side effects.
     static constexpr QAccessible::Event eventType = QAccessible::NameChanged;
 
     if (focused.iface && needsRevoicing(*focused.iface, eventType)) {

@@ -42,6 +42,10 @@ static QString formatVal(const ITestCaseContext::Val& val)
 
 Ret TestCaseReport::beginReport(const TestCase& testCase)
 {
+    // A previous report must not look open when this one fails: the file and stream are
+    // reused for the next test case, and the caller checks the returned Ret.
+    m_opened = false;
+
     io::path_t reportsPath = configuration()->reportsPath();
     Ret ret = fileSystem()->makePath(reportsPath);
     if (!ret) {
@@ -54,13 +58,17 @@ Ret TestCaseReport::beginReport(const TestCase& testCase)
 
     QString tcname = testCase.name();
     QDateTime now = QDateTime::currentDateTime();
-    QString reportPath = reportsPath.toQString()
-                         + "/" + tcname
-                         + "_" + now.toString("yyMMddhhmmss")
-                         + ".txt";
+    // The test case name is descriptive text and may contain characters that are not valid in
+    // a file name (for example "TC11: ..."), so only the file name is escaped; the report
+    // content keeps the name verbatim.
+    QString reportFileName = io::escapeFileName(tcname).toQString()
+                             + "_" + now.toString("yyMMddhhmmss")
+                             + ".txt";
+    QString reportPath = reportsPath.toQString() + "/" + reportFileName;
 
     m_file.setFileName(reportPath);
     if (!m_file.open(QIODevice::WriteOnly)) {
+        LOGE() << "failed open report file: " << reportPath;
         return make_ret(Ret::Code::UnknownError);
     }
 

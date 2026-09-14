@@ -20,6 +20,22 @@
 
 muse_create_module(muse_global ALIAS muse::global)
 
+if (MUSE_APP_INSTALL_RESOURCES_LOCATION)
+    # Vendored third party compiled into muse_global. Each module keeps its own license text,
+    # and pugixml/picojson carry theirs inside the source file that is compiled.
+    include(SetupLicenseNotices)
+    muse_install_license_notice(kors "${CMAKE_CURRENT_LIST_DIR}/thirdparty"
+        "kors_async/LICENSE"
+        "kors_logger/LICENSE"
+        "kors_modularity/LICENSE"
+        "kors_msgpack/LICENSE"
+        "kors_profiler/LICENSE"
+        "kors_rpcqueue/LICENSE")
+    muse_install_license_notice(utf8cpp "${CMAKE_CURRENT_LIST_DIR}/thirdparty/utfcpp" "LICENSE")
+    muse_install_license_notice(pugixml "${CMAKE_CURRENT_LIST_DIR}/thirdparty/pugixml" "pugixml.hpp")
+    muse_install_license_notice(picojson "${CMAKE_CURRENT_LIST_DIR}/thirdparty/picojson" "picojson.h")
+endif()
+
 include(thirdparty/kors_logger/logger.cmake)
 include(thirdparty/kors_profiler/profiler/profiler.cmake)
 include(thirdparty/kors_modularity/modularity/modularity.cmake)

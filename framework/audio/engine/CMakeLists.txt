@@ -186,6 +186,16 @@ else()
 
     add_subdirectory(../thirdparty/fluidsynth fluidsynth)
     target_link_libraries(muse_audio_engine PRIVATE fluidsynth)
+
+    if (MUSE_APP_INSTALL_RESOURCES_LOCATION)
+        include(SetupLicenseNotices)
+        muse_install_license_notice(fluidsynth
+            "${CMAKE_CURRENT_LIST_DIR}/../thirdparty/fluidsynth/fluidsynth-2.3.3"
+            "LICENSE")
+        # stb_vorbis is compiled into the engine through a direct #include; it ships its
+        # public-domain dedication inside the source file, which is the notice to install.
+        muse_install_license_notice(stb-vorbis "${CMAKE_CURRENT_LIST_DIR}/../thirdparty/stb" "stb_vorbis.c")
+    endif()
 endif() # End of real engine
 
 if (MUSE_MODULE_AUDIO_EXPORT)
@@ -207,14 +217,60 @@ if (MUSE_MODULE_AUDIO_EXPORT)
         internal/export/aacencoder.h
     )
 
-    target_link_libraries(muse_audio_engine PRIVATE libmp3lame::libmp3lame)
-    target_compile_definitions(muse_audio_engine PRIVATE SYSTEM_LAME)
+    if(MUSE_USE_SYSTEM_LAME)
+        set(MUSE_LAME_INCLUDE_DIR "" CACHE PATH "Path to directory containing lame/lame.h (optional)")
+        set(MUSE_LAME_LIB_DIR     "" CACHE PATH "Path to directory containing libmp3lame (optional)")
+        find_path(LAME_INCLUDE_DIR
+            NAMES lame/lame.h
+            HINTS "${MUSE_LAME_INCLUDE_DIR}"
+        )
+        find_library(LAME_LIBRARY
+            NAMES mp3lame
+            HINTS "${MUSE_LAME_LIB_DIR}"
+        )
+        if(NOT LAME_INCLUDE_DIR)
+            message(FATAL_ERROR "System lame: could not find lame/lame.h. "
+                "Set MUSE_LAME_INCLUDE_DIR to the directory that contains lame/lame.h.")
+        endif()
+        if(NOT LAME_LIBRARY)
+            message(FATAL_ERROR "System lame: could not find libmp3lame. "
+                "Set MUSE_LAME_LIB_DIR to the directory that contains libmp3lame.")
+        endif()
+        message(STATUS "Using system lame: ${LAME_LIBRARY} (headers: ${LAME_INCLUDE_DIR})")
+        target_include_directories(muse_audio_engine PRIVATE "${LAME_INCLUDE_DIR}")
+        target_link_libraries(muse_audio_engine PRIVATE "${LAME_LIBRARY}")
+        target_compile_definitions(muse_audio_engine PRIVATE SYSTEM_LAME)
+    else()
+        add_subdirectory(../thirdparty/lame lame EXCLUDE_FROM_ALL)
+        target_link_libraries(muse_audio_engine PRIVATE lame)
+    endif()
 
-    target_link_libraries(muse_audio_engine PRIVATE opusenc::opusenc Opus::opus)
+    include(../cmake/SetupOpusEnc.cmake)
+    target_link_libraries(muse_audio_engine PRIVATE ${LIBOPUSENC_TARGETS})
 
-    target_link_libraries(muse_audio_engine PRIVATE FLAC::FLAC FLAC::FLAC++)
+    include(../cmake/SetupFlac.cmake)
+    target_link_libraries(muse_audio_engine PRIVATE ${FLAC_TARGETS})
 
-    target_link_libraries(muse_audio_engine PRIVATE fdk-aac::fdk-aac)
+    if (MUSE_APP_INSTALL_RESOURCES_LOCATION)
+        # Vendored encoders linked statically into the export path.
+        include(SetupLicenseNotices)
+        muse_install_license_notice(lame "${CMAKE_CURRENT_LIST_DIR}/../thirdparty/lame" "LICENSE" "COPYING")
+        muse_install_license_notice(flac "${CMAKE_CURRENT_LIST_DIR}/../thirdparty/flac/flac-1.4.3"
+            "COPYING.Xiph" "COPYING.LGPL" "COPYING.GPL" "COPYING.FDL")
+        muse_install_license_notice(opus "${CMAKE_CURRENT_LIST_DIR}/../thirdparty/opus/opus-1.5.2" "COPYING")
+        muse_install_license_notice(libopusenc
+            "${CMAKE_CURRENT_LIST_DIR}/../thirdparty/opusenc/libopusenc-0.2.1" "COPYING")
+    endif()
+
+    target_link_libraries(muse_audio_engine PRIVATE fdk-aac)
+
+    get_property(fdk_aac_src_dir GLOBAL PROPERTY fdk-aac_SOURCE_DIR)
+    target_include_directories(muse_audio_engine SYSTEM PRIVATE
+        ${fdk_aac_src_dir}
+        ${fdk_aac_src_dir}/libAACdec/include
+        ${fdk_aac_src_dir}/libAACenc/include
+        ${fdk_aac_src_dir}/libSYS/include
+    )
 endif() # MUSE_MODULE_AUDIO_EXPORT
 
 target_link_libraries(muse_audio_engine PRIVATE muse_audio_common)
