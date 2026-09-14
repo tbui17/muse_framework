@@ -1,0 +1,1 @@
+SPIRV-Cross copyright fixture for SetupLicenseNotices tests.

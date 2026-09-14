@@ -74,9 +74,10 @@ endfunction()
 #
 # The Qt license texts alone are not attribution. Each shipped Qt module's own source
 # archive carries its LICENSES set, its REUSE.toml/licenseRule.json and qt_attribution.json
-# files. Every legal file named by that metadata is installed verbatim. We do not scan
-# arbitrary source files by name: the set is the canonical Qt license metadata plus the
-# files explicitly referenced by each attribution record.
+# files. Every legal file named by that metadata, together with the explicit required notice
+# set below, is installed verbatim. We do not scan arbitrary source files by name: the set is
+# the canonical Qt license metadata, explicitly required notices, and files referenced by each
+# attribution record.
 function(muse_install_qt_module_notices notice_payload_root)
     if (NOT MUSE_APP_INSTALL_RESOURCES_LOCATION)
         message(FATAL_ERROR
@@ -120,6 +121,7 @@ function(muse_install_qt_module_notices notice_payload_root)
                 "pinned source archive at '${root}'. Update the notice set instead of shipping "
                 "Qt without its third-party attribution.")
         endif()
+        list(APPEND required_notice_files_${module} "${root}/${relative}")
     endforeach()
 
     foreach (module IN LISTS ARGN)
@@ -143,7 +145,9 @@ function(muse_install_qt_module_notices notice_payload_root)
             "${root}/REUSE.toml")
         file(GLOB_RECURSE license_rule_files LIST_DIRECTORIES false
             "${root}/licenseRule.json")
-        set(notices ${canonical_license_files} ${reuse_files} ${license_rule_files})
+        set(notices
+            ${required_notice_files_${module}}
+            ${canonical_license_files} ${reuse_files} ${license_rule_files})
 
         file(GLOB_RECURSE attribution_files LIST_DIRECTORIES false
             "${root}/qt_attribution.json")
