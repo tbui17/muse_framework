@@ -22,11 +22,10 @@
 function(googletest_Populate local_path)
     muse_dependency_payload(googletest "${local_path}")
 
-    set(src_path "${local_path}/googletest")
-    if (NOT EXISTS "${src_path}/googletest/CMakeLists.txt")
+    if (NOT EXISTS "${local_path}/googletest/CMakeLists.txt")
         message(FATAL_ERROR "[googletest] pinned source tree is missing its googletest CMake project")
     endif()
-    set_property(GLOBAL PROPERTY googletest_SOURCE_DIR "${src_path}")
+    set_property(GLOBAL PROPERTY googletest_SOURCE_DIR "${local_path}")
 endfunction()
 
 # Preserve the current-main MuseDeps meta.cmake contract used by framework/CMakeLists.txt.
