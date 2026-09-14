@@ -24,7 +24,23 @@ function(opus_Populate local_path)
     set(OPUS_INSTALL_PKG_CONFIG_MODULE OFF CACHE BOOL "Install Opus pkg-config metadata" FORCE)
     set(OPUS_INSTALL_CMAKE_CONFIG_MODULE OFF CACHE BOOL "Install Opus CMake package metadata" FORCE)
 
+    # Upstream enables its tests when the project-wide BUILD_TESTING is on, even if
+    # OPUS_BUILD_TESTING is off. Isolate that option so third-party tests are not
+    # registered without their executables in the project test graph.
+    set(_muse_build_testing_was_defined FALSE)
+    if (DEFINED BUILD_TESTING)
+        set(_muse_build_testing_was_defined TRUE)
+        set(_muse_build_testing_value "${BUILD_TESTING}")
+    endif()
+    set(BUILD_TESTING OFF)
+
     add_subdirectory("${src_path}" "${CMAKE_BINARY_DIR}/muse-deps-opus" EXCLUDE_FROM_ALL)
+
+    if (_muse_build_testing_was_defined)
+        set(BUILD_TESTING "${_muse_build_testing_value}")
+    else()
+        unset(BUILD_TESTING)
+    endif()
 
     if (NOT TARGET Opus::opus)
         message(FATAL_ERROR "[opus] upstream source did not provide the canonical Opus::opus target")
