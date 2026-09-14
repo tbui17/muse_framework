@@ -13,7 +13,7 @@ else()
     muse_dependency_output_dir(asiosdk _asio_output_dir)
     muse_dependency_populate(asiosdk "${_asio_output_dir}")
 
-    set(ASIO_SDK_PATH "${_asio_output_dir}")
+    set(ASIO_SDK_PATH "${_asio_output_dir}/ASIOSDK")
     message(STATUS "ASIO_SDK_PATH: ${ASIO_SDK_PATH}")
 
     if (MUSE_APP_INSTALL_RESOURCES_LOCATION)
@@ -28,7 +28,6 @@ else()
         )
     endif()
 endif()
-set(ASIO_SDK_PATH ${_asio_src}/asiosdk)
 
 target_sources(asiosdk PRIVATE
     ${CMAKE_CURRENT_LIST_DIR}/asiosdk_asio.cpp
