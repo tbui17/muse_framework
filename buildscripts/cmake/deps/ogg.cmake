@@ -22,6 +22,10 @@ function(ogg_Populate local_path)
     set(INSTALL_PKG_CONFIG_MODULE OFF CACHE BOOL "Install libogg pkg-config metadata" FORCE)
     set(INSTALL_CMAKE_PACKAGE_MODULE OFF CACHE BOOL "Install libogg CMake package metadata" FORCE)
 
+    if (CMAKE_VERSION VERSION_GREATER_EQUAL 4.0)
+        set(CMAKE_POLICY_VERSION_MINIMUM 3.5)
+    endif()
+
     add_subdirectory("${src_path}" "${CMAKE_BINARY_DIR}/muse-deps-ogg" EXCLUDE_FROM_ALL)
 
     if (NOT TARGET Ogg::ogg)

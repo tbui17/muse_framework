@@ -18,6 +18,10 @@ function(fdk-aac_Populate local_path)
     set(BUILD_SHARED_LIBS OFF CACHE BOOL "Build shared library" FORCE)
     set(BUILD_PROGRAMS OFF CACHE BOOL "Build extra utilities" FORCE)
 
+    if (CMAKE_VERSION VERSION_GREATER_EQUAL 4.0)
+        set(CMAKE_POLICY_VERSION_MINIMUM 3.5)
+    endif()
+
     add_subdirectory("${src_path}" "${CMAKE_BINARY_DIR}/fdk-aac" EXCLUDE_FROM_ALL)
 
     if (TARGET fdk-aac AND NOT TARGET fdk-aac::fdk-aac)

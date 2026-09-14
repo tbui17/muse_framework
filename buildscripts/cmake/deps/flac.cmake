@@ -32,6 +32,10 @@ function(flac_Populate local_path)
     set(INSTALL_CMAKE_CONFIG_MODULE OFF CACHE BOOL "Install FLAC CMake package metadata" FORCE)
     set(WITH_OGG ON CACHE BOOL "Build FLAC Ogg support" FORCE)
 
+    if (CMAKE_VERSION VERSION_GREATER_EQUAL 4.0)
+        set(CMAKE_POLICY_VERSION_MINIMUM 3.5)
+    endif()
+
     add_subdirectory("${src_path}" "${CMAKE_BINARY_DIR}/muse-deps-flac" EXCLUDE_FROM_ALL)
 
     if (NOT TARGET FLAC::FLAC OR NOT TARGET FLAC::FLAC++)
