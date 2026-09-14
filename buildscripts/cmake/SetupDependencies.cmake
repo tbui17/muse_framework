@@ -24,6 +24,21 @@ include(MuseDeps)
 if (MUSE_APP_INSTALL_RESOURCES_LOCATION)
     include(SetupLicenseNotices)
 endif()
+populate(picojson)
+populate(pugixml)
+populate(utfcpp)
+
+if (MUSE_APP_INSTALL_RESOURCES_LOCATION)
+    get_property(_picojson_source_dir GLOBAL PROPERTY picojson_SOURCE_DIR)
+    muse_install_license_notice(picojson "${_picojson_source_dir}/picojson" "LICENSE")
+
+    get_property(_pugixml_source_dir GLOBAL PROPERTY pugixml_SOURCE_DIR)
+    muse_install_license_notice(pugixml "${_pugixml_source_dir}/pugixml" "LICENSE.md")
+
+    get_property(_utfcpp_source_dir GLOBAL PROPERTY utfcpp_SOURCE_DIR)
+    muse_install_license_notice(utf8cpp "${_utfcpp_source_dir}/utfcpp" "LICENSE")
+endif()
+
 
 if (MUSE_MODULE_DOCKWINDOW_KDDOCKWIDGETS_V2)
     populate(kddockwidgets)
@@ -70,9 +85,9 @@ if (MUSE_APP_INSTALL_RESOURCES_LOCATION)
         "framework/audio/thirdparty/opusenc/libopusenc-0.2.1|libopusenc 0.2.1, in-tree"
         "framework/audio/thirdparty/stb/stb_vorbis.c|stb_vorbis v1.22, in-tree"
         "framework/global/thirdparty/kors_*|kors modules, in-tree"
-        "framework/global/thirdparty/utfcpp|utf8cpp, in-tree"
-        "framework/global/thirdparty/pugixml|pugixml, license text inside pugixml.hpp"
-        "framework/global/thirdparty/picojson|picojson, license text inside picojson.h"
+        "picojson|picojson 111c9be, pinned source payload"
+        "pugixml/src|pugixml 1.15, pinned source payload"
+        "utfcpp/source|utf8cpp 4.1.1, pinned source payload"
         "framework/dockwindow/thirdparty/KDDockWidgets|KDDockWidgets 1.4.95, in-tree"
         "src/braille/thirdparty/liblouis|liblouis 3.24.0, in-tree"
         "src/engraving/thirdparty/intervaltree|intervaltree, in-tree"

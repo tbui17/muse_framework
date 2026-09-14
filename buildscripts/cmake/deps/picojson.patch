@@ -1,0 +1,56 @@
+diff --git a/picojson.h b/picojson.h
+index 3b6a5b7..c7cb12e 100644
+--- a/picojson.h
++++ b/picojson.h
+@@ -31,6 +31,8 @@
+ #include <algorithm>
+ #include <cstdio>
+ #include <cstdlib>
++#include <sstream>
++#include <iomanip>
+ #include <cstring>
+ #include <cstddef>
+ #include <iostream>
+@@ -493,21 +495,31 @@ inline std::string value::to_str() const {
+   }
+ #endif
+   case number_type: {
+-    char buf[256];
+     double tmp;
+-    SNPRINTF(buf, sizeof(buf), fabs(u_.number_) < (1ULL << 53) && modf(u_.number_, &tmp) == 0 ? "%.f" : "%.17g", u_.number_);
+-#if PICOJSON_USE_LOCALE
+-    char *decimal_point = localeconv()->decimal_point;
+-    if (strcmp(decimal_point, ".") != 0) {
+-      size_t decimal_point_len = strlen(decimal_point);
+-      for (char *p = buf; *p != '\0'; ++p) {
+-        if (strncmp(p, decimal_point, decimal_point_len) == 0) {
+-          return std::string(buf, p) + "." + (p + decimal_point_len);
++    if (fabs(u_.number_) < (1ULL << 53) && modf(u_.number_, &tmp) == 0) {
++      return std::to_string(static_cast<int>(u_.number_));
++    }
++
++    std::stringstream stream;
++    stream << std::fixed << std::setprecision(6) << u_.number_;
++    std::string s = stream.str();
++
++    // remove extra '0'
++    size_t correctedIdx = s.size() - 1;
++    if (s.back() == '0') {
++      for (int i = static_cast<int>(s.size() - 1); i > 0; --i) {
++        if (s.at(i) != '0') {
++          correctedIdx = i;
++          break;
+         }
+       }
+     }
+-#endif
+-    return buf;
++
++    if (s.at(correctedIdx) == '.') {
++      --correctedIdx;
++    }
++
++    return std::string(s.c_str(), correctedIdx + 1);
+   }
+   case string_type:
+     return *u_.string_;

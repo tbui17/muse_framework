@@ -19,10 +19,8 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 muse_create_module(muse_global ALIAS muse::global)
-
 if (MUSE_APP_INSTALL_RESOURCES_LOCATION)
-    # Vendored third party compiled into muse_global. Each module keeps its own license text,
-    # and pugixml/picojson carry theirs inside the source file that is compiled.
+    # Vendored kors modules are compiled into muse_global and keep their notices in-tree.
     include(SetupLicenseNotices)
     muse_install_license_notice(kors "${CMAKE_CURRENT_LIST_DIR}/thirdparty"
         "kors_async/LICENSE"
@@ -31,9 +29,6 @@ if (MUSE_APP_INSTALL_RESOURCES_LOCATION)
         "kors_msgpack/LICENSE"
         "kors_profiler/LICENSE"
         "kors_rpcqueue/LICENSE")
-    muse_install_license_notice(utf8cpp "${CMAKE_CURRENT_LIST_DIR}/thirdparty/utfcpp" "LICENSE")
-    muse_install_license_notice(pugixml "${CMAKE_CURRENT_LIST_DIR}/thirdparty/pugixml" "pugixml.hpp")
-    muse_install_license_notice(picojson "${CMAKE_CURRENT_LIST_DIR}/thirdparty/picojson" "picojson.h")
 endif()
 
 include(thirdparty/kors_logger/logger.cmake)
@@ -255,12 +250,30 @@ else()
 endif()
 
 include(GetCompilerInfo)
-if (NOT CC_IS_EMCC) #zlib included in main linker
+if (NOT CC_IS_EMCC) # zlib is included in the main linker for Emscripten
+    if (NOT TARGET zlib::zlib)
+        if (WIN32)
+            message(FATAL_ERROR
+                "[zlib] pinned zlib::zlib target is unavailable on Windows; "
+                "the locked native dependency bootstrap did not run")
+        endif()
+
+        # Standalone and no-Qt configurations do not run the application dependency
+        # manifest. Bind the canonical MuseDeps target name to the host zlib package
+        # without weakening the locked Windows path above.
+        find_package(ZLIB REQUIRED)
+        if (NOT TARGET ZLIB::ZLIB)
+            message(FATAL_ERROR "[zlib] FindZLIB did not provide ZLIB::ZLIB")
+        endif()
+        add_library(zlib::zlib ALIAS ZLIB::ZLIB)
+    endif()
     target_link_libraries(muse_global PRIVATE zlib::zlib)
 endif()
 
 get_property(_picojson GLOBAL PROPERTY picojson_SOURCE_DIR)
-target_include_directories(muse_global PRIVATE ${_picojson}/picojson)
+if (_picojson)
+    target_include_directories(muse_global PRIVATE ${_picojson}/picojson)
+endif()
 
 if (MUSE_QT_SUPPORT)
     # These are needed by so many modules, that we make them public here,

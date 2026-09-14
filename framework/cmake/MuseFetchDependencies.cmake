@@ -28,6 +28,8 @@ if (OS_IS_WIN)
 
     set(DEPENDENCIES_LIB_DIR ${DEPENDENCIES_DIR}/libx64)
     set(DEPENDENCIES_INC ${DEPENDENCIES_DIR}/include)
+    include(FindZlibStatic)
+
 
     message(STATUS "Windows prebuilt dependencies: ${DEPENDENCIES_DIR}")
 

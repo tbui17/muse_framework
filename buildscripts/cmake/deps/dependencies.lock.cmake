@@ -112,6 +112,38 @@ set(MUSE_DEP_vst3sdk_EXPECTED
 
 
 
+# --- Source-delivery dependencies compiled or included by muse_global --------------
+# These pins mirror the current MuseDeps source recipes. Their checked-in recipes
+# expose the same target and source-directory contracts without executing remote
+# CMake at configure time.
+set(MUSE_DEP_picojson_VERSION "111c9be")
+set(MUSE_DEP_picojson_PAYLOADS
+    "single-root|picojson|https://github.com/kazuho/picojson/archive/111c9be5188f7350c2eac9ddaedd8cca3d7bf394.tar.gz|671f89832a17e9e71398f80c0a326afa2ebe81f4c26d5a9992e1fcd0888ae151"
+)
+set(MUSE_DEP_picojson_EXPECTED
+    "picojson/LICENSE"
+    "picojson/picojson.h"
+)
+
+set(MUSE_DEP_pugixml_VERSION "1.15")
+set(MUSE_DEP_pugixml_PAYLOADS
+    "single-root|pugixml|https://github.com/zeux/pugixml/releases/download/v1.15/pugixml-1.15.tar.gz|655ade57fa703fb421c2eb9a0113b5064bddb145d415dd1f88c79353d90d511a"
+)
+set(MUSE_DEP_pugixml_EXPECTED
+    "pugixml/LICENSE.md"
+    "pugixml/src/pugixml.cpp"
+    "pugixml/src/pugixml.hpp"
+)
+
+set(MUSE_DEP_utfcpp_VERSION "4.1.1")
+set(MUSE_DEP_utfcpp_PAYLOADS
+    "single-root|utfcpp|https://github.com/nemtrif/utfcpp/archive/refs/tags/v4.1.1.tar.gz|1ca68016f0abc24172998e39ce0d8f8e2b7a26f7579a0ff85d4e1b9a7aea56f8"
+)
+set(MUSE_DEP_utfcpp_EXPECTED
+    "utfcpp/LICENSE"
+    "utfcpp/source/utf8.h"
+)
+
 # --- License notice texts (no build products; see deps/license_notices.cmake) ------
 # Three components that ship inside the Windows package carry no notice file in their
 # own pinned payload, and the Qt binary package does not carry the license texts at all,
