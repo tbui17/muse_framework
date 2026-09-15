@@ -71,8 +71,7 @@ void TestCaseRunner::run(const TestCase& testCase)
 
     nextStep();
 
-    if (m_testCase.currentStepIdx < m_testCase.stepsCount
-            && !m_testCase.finished.load(std::memory_order_acquire)) {
+    if (detail::shouldEnterEventLoop(m_testCase.currentStepIdx, m_testCase.stepsCount, m_testCase.finished)) {
         m_testCase.loop.exec();
     }
 }

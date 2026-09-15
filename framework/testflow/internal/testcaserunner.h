@@ -36,6 +36,13 @@
 #include "../testflowtypes.h"
 
 namespace muse::testflow {
+
+namespace detail {
+inline bool shouldEnterEventLoop(int currentStepIdx, int stepsCount, const std::atomic_bool& finished)
+{
+    return currentStepIdx < stepsCount && !finished.load(std::memory_order_acquire);
+}
+}
 class TestCaseRunner : public async::Asyncable
 {
 public:
