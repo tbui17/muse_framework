@@ -22,6 +22,7 @@
 #ifndef MUSE_TESTFLOW_TESTCASERUNNER_H
 #define MUSE_TESTFLOW_TESTCASERUNNER_H
 
+#include <atomic>
 #include <vector>
 #include <memory>
 #include <QJSValue>
@@ -35,6 +36,13 @@
 #include "../testflowtypes.h"
 
 namespace muse::testflow {
+
+namespace detail {
+inline bool shouldEnterEventLoop(int currentStepIdx, int stepsCount, const std::atomic_bool& finished)
+{
+    return currentStepIdx < stepsCount && !finished.load(std::memory_order_acquire);
+}
+}
 class TestCaseRunner : public async::Asyncable
 {
 public:
@@ -67,6 +75,7 @@ private:
         int currentStepIdx = -1;
         int finishedCount = 0;
         QString lastStepName;
+        std::atomic_bool finished = false;
         QEventLoop loop;
 
         void reset()
@@ -77,6 +86,7 @@ private:
             currentStepIdx = -1;
             finishedCount = 0;
             lastStepName.clear();
+            finished.store(false, std::memory_order_relaxed);
             if (loop.isRunning()) {
                 loop.quit();
             }
@@ -84,6 +94,7 @@ private:
     };
 
     void nextStep(bool byInterval = true);
+    void finish(bool aborted);
     void doAbort();
 
     int m_intervalMsec = 1000;

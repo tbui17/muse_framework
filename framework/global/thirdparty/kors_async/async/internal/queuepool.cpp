@@ -56,56 +56,74 @@ QueuePool::ThreadData* QueuePool::threadData(const std::thread::id& threadId, bo
     // so we find data for a given thread,
     // but we can work with it concurrently from different threads!!
 
+    //! Guard against access during shutdown. Callers (regPort, processMessages)
+    //! check conf::terminated before calling, but static destruction order means
+    //! threadData() can still be reached from other threads after terminate().
+    if (conf::terminated.load()) {
+        return nullptr;
+    }
+
+    ThreadData* result = nullptr;
+
+    //! Lock the entire lookup + create path. The vector itself is never
+    //! resized (fixed at MAX_THREADS), but under MSVC Debug
+    //! (_ITERATOR_DEBUG_LEVEL=2) concurrent element writes
+    //! (m_threads[count] = thdata) invalidate the vector proxy, making
+    //! concurrent reads of m_threads.size() or m_threads.at(i) crash.
+    //! The lock is held only for the lookup/allocation, not for the
+    //! caller's subsequent thdata->mutex lock (avoids the deadlock that
+    //! commit f923d41 was addressing — all callers acquire thdata->mutex
+    //! only after threadData() returns, i.e. after m_mutex is released).
+    std::scoped_lock lock(m_mutex);
+
     size_t count = m_count.load();
     assert(count <= m_threads.size());
     for (size_t i = 0; i < count; ++i) {
         ThreadData* thdata = m_threads.at(i);
         // found a slot for the given thread
         if (thdata->threadId == threadId) {
-            return thdata;
+            result = thdata;
+            break;
         }
     }
 
-    if (create) {
+    if (!result && create) {
         // We didn't find ThreadData, let's use the next empty slot if there are any left.
-        // The `m_threads` collection itself doesn't change,
-        // we don't lock it, we only lock a slot in this collection.
-        // therefore, we can iterate over this collection
-        // in other threads without a lock.
-        // `m_count` limits the number of iterations (only filled slots).
-        std::scoped_lock lock(m_mutex);
         count = m_count.load();
         if (count < m_threads.size()) {
             ThreadData* thdata = new ThreadData();
             thdata->threadId = threadId;
             m_threads[count] = thdata;
             ++m_count;
-            return thdata;
-        }
+            result = thdata;
+        } else {
+            // There are no empty slots, let's try
+            // found a slot that has no ports (all ports are unregistered)
+            for (size_t i = 0; i < m_threads.size(); ++i) {
+                ThreadData* thdata = m_threads.at(i);
+                if (!thdata) {
+                    continue;
+                }
 
-        // There are no empty slots, let's try
-        // found a slot that has no ports (all ports are unregistered)
-        for (size_t i = 0; i < m_threads.size(); ++i) {
-            ThreadData* thdata = m_threads.at(i);
-            if (!thdata) {
-                continue;
+                std::scoped_lock innerLock(thdata->mutex);
+                if (!thdata->ports.empty()) {
+                    continue;
+                }
+
+                // Reuse the existing ThreadData if it has no ports
+                thdata->threadId = threadId;
+                result = thdata;
+                break;
             }
 
-            std::scoped_lock innerLock(thdata->mutex);
-            if (!thdata->ports.empty()) {
-                continue;
+            if (!result) {
+                // No free slots found, the thread pool is exhausted
+                assert(false && "thread pool exhausted");
             }
-
-            // Reuse the existing ThreadData if it has no ports
-            thdata->threadId = threadId;
-            return thdata;
         }
-
-        // No free slots found, the thread pool is exhausted
-        assert(false && "thread pool exhausted");
     }
 
-    return nullptr;
+    return result;
 }
 
 void QueuePool::regPort(const std::thread::id& th, const std::shared_ptr<Port>& port)
@@ -116,7 +134,6 @@ void QueuePool::regPort(const std::thread::id& th, const std::shared_ptr<Port>& 
     }
 
     // the queue is no longer functioning
-    assert(!conf::terminated);
     if (conf::terminated) {
         return;
     }
@@ -149,7 +166,6 @@ void QueuePool::unregPort(const std::thread::id& th, const std::shared_ptr<Port>
     }
 
     ThreadData* thdata = threadData(th, false);
-    assert(thdata);
     if (!thdata) {
         return;
     }
@@ -167,8 +183,6 @@ void QueuePool::processMessages()
 
 void QueuePool::processMessages(const std::thread::id& th)
 {
-    assert(!conf::terminated);
-
     ThreadData* thdata = threadData(th, false);
     if (!thdata) {
         return;

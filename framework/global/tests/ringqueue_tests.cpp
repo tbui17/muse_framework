@@ -20,8 +20,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <thread>
+#include <atomic>
 #include <chrono>
+#include <thread>
 
 #include <gtest/gtest.h>
 
@@ -45,20 +46,27 @@ TEST_F(Global_Concurrency_RingQueueTests, FixedSizeQueue)
     // next power of two
     EXPECT_EQ(q.capacity(), 16);
 
-    auto t1 = std::thread([&q]() {
+    //! NOTE Completion is synchronized on the producer instead of a fixed number of fast attempts:
+    //! on a loaded machine the consumer could exhaust any bounded attempt budget before the
+    //! producer thread was scheduled at all. The consumer keeps draining while the producer is
+    //! active and only stops after it observed the producer finishing and then found the queue
+    //! empty, so the test still exercises the producer and consumer concurrently.
+    std::atomic<bool> producerDone { false };
+
+    auto t1 = std::thread([&q, &producerDone]() {
         for (int i = 0; i < 10; ++i) {
             Msg m { i };
             bool ok = q.tryPush(std::move(m));
             EXPECT_TRUE(ok);
         }
+
+        producerDone.store(true, std::memory_order_release);
     });
 
-    auto t2 = std::thread([&q]() {
-        int iteration = 0;
+    auto t2 = std::thread([&q, &producerDone]() {
         int successCount = 0;
-        while (iteration < 10000) { // anti freeze
-            std::this_thread::sleep_for(std::chrono::milliseconds(10));
-            ++iteration;
+        while (true) {
+            const bool producerFinished = producerDone.load(std::memory_order_acquire);
             Msg m;
             bool ok = q.tryPop(m);
             //! NOTE It might not be ok if the queue is empty
@@ -66,6 +74,12 @@ TEST_F(Global_Concurrency_RingQueueTests, FixedSizeQueue)
             if (ok) {
                 EXPECT_EQ(m.val, successCount);
                 successCount++;
+            } else if (producerFinished) {
+                //! NOTE An empty pop taken after the producer finished: every pushed item was
+                //! consumed, and a lost value is reported by the final count assertion below.
+                break;
+            } else {
+                std::this_thread::yield();
             }
 
             if (successCount == 10) {

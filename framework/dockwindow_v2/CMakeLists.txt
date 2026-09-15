@@ -46,12 +46,13 @@ target_sources(muse_dockwindow PRIVATE
 ###########################################
 # Setup the KDDockWidgets lib
 ###########################################
-
-kddockwidgets_add_to_build()
+get_property(kddockwidgets_src_dir GLOBAL PROPERTY kddockwidgets_SOURCE_DIR)
+if (NOT kddockwidgets_src_dir OR NOT TARGET kddockwidgets)
+    message(FATAL_ERROR "[kddockwidgets] pinned kddockwidgets target/source is unavailable")
+endif()
 
 target_link_libraries(muse_dockwindow PRIVATE kddockwidgets)
 
-get_property(kddockwidgets_src_dir GLOBAL PROPERTY kddockwidgets_SOURCE_DIR)
 target_include_directories(muse_dockwindow SYSTEM PRIVATE
     ${kddockwidgets_src_dir}
     ${kddockwidgets_src_dir}/kddockwidgets/src

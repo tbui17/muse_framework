@@ -132,3 +132,14 @@ void InteractiveApi::openUrl(const QString& url)
 {
     platformInteractive()->openUrl(QUrl(url));
 }
+
+/** APIDOC
+ * Check whether a dialog or view is currently open
+ * @method
+ * @param {String} uri URI to check (e.g. "musescore://about/musescore")
+ * @returns {Boolean} true if the dialog/view is open
+ */
+bool InteractiveApi::isOpened(const QString& uri) const
+{
+    return interactive()->isOpened(Uri(uri.toStdString())).val;
+}

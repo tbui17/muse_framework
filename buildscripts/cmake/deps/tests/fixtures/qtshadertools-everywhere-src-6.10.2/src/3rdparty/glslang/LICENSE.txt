@@ -1,0 +1,1 @@
+glslang license fixture for SetupLicenseNotices tests.

@@ -38,6 +38,7 @@ public:
     explicit AccessibilityApi(muse::api::IApiEngine* e);
 
     Q_INVOKABLE QString currentName() const;
+    Q_INVOKABLE QString announcement() const;
 };
 }
 

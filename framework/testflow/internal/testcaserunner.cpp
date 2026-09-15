@@ -22,6 +22,7 @@
 #include "testcaserunner.h"
 
 #include <QTimer>
+#include <QMetaObject>
 
 #include "log.h"
 
@@ -70,7 +71,7 @@ void TestCaseRunner::run(const TestCase& testCase)
 
     nextStep();
 
-    if (m_testCase.currentStepIdx < m_testCase.stepsCount) {
+    if (detail::shouldEnterEventLoop(m_testCase.currentStepIdx, m_testCase.stepsCount, m_testCase.finished)) {
         m_testCase.loop.exec();
     }
 }
@@ -105,10 +106,16 @@ async::Channel<bool> TestCaseRunner::allFinished() const
     return m_allFinished;
 }
 
+void TestCaseRunner::finish(bool aborted)
+{
+    m_testCase.finished.store(true, std::memory_order_release);
+    QMetaObject::invokeMethod(&m_testCase.loop, &QEventLoop::quit, Qt::QueuedConnection);
+    m_allFinished.send(aborted);
+}
+
 void TestCaseRunner::doAbort()
 {
-    m_allFinished.send(true);
-    m_testCase.loop.quit();
+    finish(true);
 }
 
 int TestCaseRunner::intervalMsec() const
@@ -171,8 +178,7 @@ void TestCaseRunner::nextStep(bool byInterval)
 
         m_testCase.finishedCount += 1;
         if (m_testCase.finishedCount == m_testCase.stepsCount) {
-            m_allFinished.send(false);
-            m_testCase.loop.quit();
+            finish(false);
         }
     });
 }

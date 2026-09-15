@@ -20,9 +20,31 @@
 
 muse_create_thirdparty_module(vst3sdk)
 
-get_property(VST3_SDK_PATH GLOBAL PROPERTY vst3sdk_SOURCE_DIR)
-if (NOT VST3_SDK_PATH)
-    message(FATAL_ERROR "[vst3sdk] not populated; ExtDepsManifest.cmake must run before this module")
+if(MUSE_MODULE_VST_VST3_SDK_PATH)
+    set(VST3_SDK_PATH ${MUSE_MODULE_VST_VST3_SDK_PATH})
+else()
+
+    # If not set MUSE_MODULE_VST_VST3_SDK_PATH use the pinned VST 3 SDK.
+    # The reviewed recipe is buildscripts/cmake/deps/vst3sdk.cmake; its payload URLs and
+    # SHA-256 are pinned in buildscripts/cmake/deps/dependencies.lock.cmake. The SDK is
+    # assembled from three upstream repositories nested as siblings below VST3_SDK_PATH.
+
+    include(DependencyPayload)
+
+    muse_dependency_output_dir(vst3sdk _vst3sdk_output_dir)
+    muse_dependency_populate(vst3sdk "${_vst3sdk_output_dir}")
+
+    set(VST3_SDK_PATH "${_vst3sdk_output_dir}")
+
+    if (MUSE_APP_INSTALL_RESOURCES_LOCATION)
+        # Each of the three SDK repositories carries the same Steinberg license text.
+        include(SetupLicenseNotices)
+        muse_install_license_notice(vst3sdk "${_vst3sdk_output_dir}"
+            "base/LICENSE.txt"
+            "pluginterfaces/LICENSE.txt"
+            "public.sdk/LICENSE.txt"
+        )
+    endif()
 endif()
 
 include(GetPlatformInfo)
