@@ -57,7 +57,7 @@ void Testflow::init()
     });
 
     m_runner.allFinished().onReceive(this, [this](bool aborted) {
-        //! NOTE An abort that lands between steps must not leave the status at Running:
+        LOGI() << "GUI testflow allFinished transition: aborted=" << aborted;
         //! execScript() promotes Running to Finished and the GUI test runner reports that as
         //! a pass. Error/Aborted step statuses have already set the status themselves.
         if (aborted && (m_status == Status::Running || m_status == Status::Paused)) {
