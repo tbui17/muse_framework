@@ -71,7 +71,9 @@ void TestCaseRunner::run(const TestCase& testCase)
     nextStep();
 
     if (m_testCase.currentStepIdx < m_testCase.stepsCount) {
+        LOGI() << "GUI testflow runner: loop.exec begin";
         m_testCase.loop.exec();
+        LOGI() << "GUI testflow runner: loop.exec returned";
     }
 }
 

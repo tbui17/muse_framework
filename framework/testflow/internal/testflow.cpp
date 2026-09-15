@@ -222,7 +222,9 @@ void Testflow::execScript(const io::path_t& path, const Options& opt)
     setStatus(Status::Running);
     QString func = opt.func.empty() ? QString("main") : QString::fromStdString(opt.func);
     QJSValueList args = opt.funcArgs.empty() ? QJSValueList() : parseFuncArgs(opt.funcArgs, m_engine);
+    LOGI() << "GUI testflow: engine.call begin";
     Ret ret = m_engine->call(func, args);
+    LOGI() << "GUI testflow: engine.call returned";
 
     //! NOTE Also maybe abort or error
     if (status() == Status::Running) {
