@@ -172,7 +172,9 @@ void TestCaseRunner::nextStep(bool byInterval)
         m_testCase.finishedCount += 1;
         if (m_testCase.finishedCount == m_testCase.stepsCount) {
             m_allFinished.send(false);
+            LOGI() << "GUI testflow runner: loop.quit begin";
             m_testCase.loop.quit();
+            LOGI() << "GUI testflow runner: loop.quit returned";
         }
     });
 }

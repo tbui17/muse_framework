@@ -57,14 +57,16 @@ void Testflow::init()
     });
 
     m_runner.allFinished().onReceive(this, [this](bool aborted) {
-        LOGI() << "GUI testflow allFinished transition: aborted=" << aborted;
-        //! execScript() promotes Running to Finished and the GUI test runner reports that as
-        //! a pass. Error/Aborted step statuses have already set the status themselves.
+        LOGI() << "GUI testflow allFinished callback: entry, aborted=" << aborted;
+        //! execScript() promotes Running to Finished and the GUI test runner reports that as a
+        //! pass. Error/Aborted step statuses have already set the status themselves.
         if (aborted && (m_status == Status::Running || m_status == Status::Paused)) {
             setStatus(Status::Aborted);
         }
 
+        LOGI() << "GUI testflow allFinished callback: endReport begin";
         m_report.endReport(aborted);
+        LOGI() << "GUI testflow allFinished callback: exit";
     });
 
     setStatus(Status::Undefined);
