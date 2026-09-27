@@ -36,7 +36,6 @@
 #include "../testflowtypes.h"
 
 namespace muse::testflow {
-
 namespace detail {
 inline bool shouldEnterEventLoop(int currentStepIdx, int stepsCount, const std::atomic_bool& finished)
 {
